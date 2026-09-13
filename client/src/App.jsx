@@ -1,177 +1,200 @@
-import './App.css'
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import "./App.css";
 
-function App() {
+function Home() {
   return (
-    <div className="app">
-      {/* Navigation */}
-      <header className="navbar">
-        <div className="logo">
-          <span className="logo-mark">C</span>
-          <span>CivicConnect</span>
-        </div>
+    <>
+      <nav className="navbar">
+        <div className="logo">CivicConnect</div>
 
-        <nav className="nav-links">
-          <a href="#home">Home</a>
-          <a href="#issues">Issues</a>
-          <a href="#community">Community</a>
+        <div className="nav-links">
+          <Link to="/">Home</Link>
+          <Link to="/issues">Issues</Link>
+          <Link to="/community">Community</Link>
           <a href="#about">About</a>
-        </nav>
+        </div>
 
         <div className="nav-actions">
-          <button className="login-btn">Log in</button>
-          <button className="signup-btn">Get Started</button>
+          <Link to="/login" className="login-link">
+            Log in
+          </Link>
+          <Link to="/register" className="btn btn-primary">
+            Get Started
+          </Link>
         </div>
-      </header>
+      </nav>
 
-      {/* Hero Section */}
       <main>
-        <section className="hero-section" id="home">
+        <section className="hero">
           <div className="hero-content">
-            <div className="hero-badge">
-              <span>●</span> Making communities better, together
-            </div>
+            <span className="hero-badge">
+              Making communities better, together
+            </span>
 
             <h1>
-              Your voice can
-              <span> change your community.</span>
+              Your voice can change
+              <span> your community.</span>
             </h1>
 
             <p>
-              Report local problems, connect with your neighbours, and work
+              Report local issues, connect with your neighbours, and work
               together to make your neighbourhood a better place.
             </p>
 
-            <div className="hero-actions">
-              <button className="primary-btn">
-                Report an Issue <span>→</span>
-              </button>
+            <div className="hero-buttons">
+              <Link to="/report" className="btn btn-primary">
+                Report an Issue
+              </Link>
 
-              <button className="secondary-btn">
+              <Link to="/issues" className="btn btn-secondary">
                 Explore Issues
-              </button>
-            </div>
-
-            <div className="hero-stats">
-              <div>
-                <strong>1,200+</strong>
-                <span>Issues Reported</span>
-              </div>
-
-              <div>
-                <strong>850+</strong>
-                <span>Issues Resolved</span>
-              </div>
-
-              <div>
-                <strong>25+</strong>
-                <span>Communities</span>
-              </div>
+              </Link>
             </div>
           </div>
 
-          <div className="hero-visual">
-            <div className="map-card">
-              <div className="map-header">
-                <div>
-                  <strong>Community Issues</strong>
-                  <span>Nearby reports</span>
-                </div>
-
-                <div className="map-status">
-                  <span></span> Live
-                </div>
+          <div className="map-card">
+            <div className="map-header">
+              <div>
+                <strong>Community Issues</strong>
+                <p>Nearby reports</p>
               </div>
+              <span className="live-badge">● Live</span>
+            </div>
 
-              <div className="fake-map">
-                <div className="road road-one"></div>
-                <div className="road road-two"></div>
-                <div className="road road-three"></div>
+            <div className="map-area">
+              <div className="map-pin pin-one">📍</div>
+              <div className="map-pin pin-two">📍</div>
+              <div className="map-pin pin-three">📍</div>
 
-                <div className="map-pin pin-one">!</div>
-                <div className="map-pin pin-two">!</div>
-                <div className="map-pin pin-three">✓</div>
-                <div className="map-pin pin-four">!</div>
-
-                <div className="map-location">
-                  <span></span>
-                  Your neighbourhood
-                </div>
-              </div>
+              <div className="map-label label-one">Pothole</div>
+              <div className="map-label label-two">Streetlight</div>
+              <div className="map-label label-three">Garbage</div>
             </div>
           </div>
         </section>
 
-        {/* Features */}
-        <section className="features-section" id="community">
+        <section className="stats">
+          <div>
+            <strong>1,200+</strong>
+            <span>Issues Reported</span>
+          </div>
+
+          <div>
+            <strong>850+</strong>
+            <span>Issues Resolved</span>
+          </div>
+
+          <div>
+            <strong>25+</strong>
+            <span>Communities</span>
+          </div>
+        </section>
+
+        <section className="features" id="about">
           <div className="section-heading">
             <span>HOW IT WORKS</span>
-            <h2>Small reports can create big changes.</h2>
+            <h2>One platform. A stronger community.</h2>
             <p>
-              CivicConnect brings citizens and local authorities together
-              to solve everyday community problems.
+              CivicConnect makes it easier for citizens and authorities to
+              work together on local problems.
             </p>
           </div>
 
           <div className="feature-grid">
-            <article className="feature-card">
-              <div className="feature-icon report-icon">+</div>
+            <div className="feature-card">
+              <div className="feature-icon">📢</div>
               <h3>Report Issues</h3>
               <p>
-                Spotted a pothole, garbage problem, broken streetlight, or
-                water leak? Report it with a photo and location.
+                Report potholes, garbage, broken streetlights, water leaks,
+                and other civic problems with photos and location.
               </p>
-            </article>
+            </div>
 
-            <article className="feature-card">
-              <div className="feature-icon community-icon">♧</div>
+            <div className="feature-card">
+              <div className="feature-icon">👥</div>
               <h3>Build Community</h3>
               <p>
-                Connect with people in your neighbourhood and support
-                genuine issues affecting your community.
+                Connect with people in your neighbourhood and support issues
+                that affect your community.
               </p>
-            </article>
+            </div>
 
-            <article className="feature-card">
-              <div className="feature-icon track-icon">✓</div>
+            <div className="feature-card">
+              <div className="feature-icon">📈</div>
               <h3>Track Progress</h3>
               <p>
-                Follow your report from submission to resolution and see
-                how local authorities respond.
+                Follow your reported issues and see how authorities respond
+                and resolve them.
               </p>
-            </article>
+            </div>
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="cta-section" id="about">
-          <div>
-            <span>YOUR COMMUNITY. YOUR VOICE.</span>
-            <h2>Let's make your neighbourhood better.</h2>
-            <p>
-              Join CivicConnect and become an active part of your local
-              community.
-            </p>
-          </div>
+        <section className="cta">
+          <h2>Let's make your neighbourhood better.</h2>
+          <p>
+            Start reporting issues and connect with your community today.
+          </p>
 
-          <button className="primary-btn">
-            Join CivicConnect <span>→</span>
-          </button>
+          <Link to="/register" className="btn btn-primary">
+            Join CivicConnect
+          </Link>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="footer">
-        <div className="logo">
-          <span className="logo-mark">C</span>
-          <span>CivicConnect</span>
-        </div>
-
-        <p>Connecting citizens. Improving communities.</p>
-
-        <span>© 2026 CivicConnect</span>
+      <footer>
+        <p>© 2026 CivicConnect. Building better communities together.</p>
       </footer>
-    </div>
-  )
+    </>
+  );
 }
 
-export default App
+
+function Issues() {
+  return (
+    <div className="page-placeholder">
+      <h1>Community Issues</h1>
+      <p>Reported civic issues will appear here.</p>
+      <Link to="/">← Back to Home</Link>
+    </div>
+  );
+}
+
+function Report() {
+  return (
+    <div className="page-placeholder">
+      <h1>Report an Issue</h1>
+      <p>The issue reporting form will be built next.</p>
+      <Link to="/">← Back to Home</Link>
+    </div>
+  );
+}
+
+function Community() {
+  return (
+    <div className="page-placeholder">
+      <h1>Community</h1>
+      <p>Neighbourhood groups will appear here.</p>
+      <Link to="/">← Back to Home</Link>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/issues" element={<Issues />} />
+        <Route path="/report" element={<Report />} />
+        <Route path="/community" element={<Community />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
