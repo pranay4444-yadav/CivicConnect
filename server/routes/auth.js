@@ -1,9 +1,15 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const pool = require("../db");
 
 const router = express.Router();
+
+
+// =========================================================
+// Register
+// =========================================================
 
 router.post("/register", async (req, res) => {
   try {
@@ -39,6 +45,7 @@ router.post("/register", async (req, res) => {
       message: "Registration successful",
       user: result.rows[0],
     });
+
   } catch (error) {
     console.error("Registration error:", error);
 
@@ -48,4 +55,80 @@ router.post("/register", async (req, res) => {
   }
 });
 
+
+// =========================================================
+// Login
+// =========================================================
+
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Check required fields
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
+    }
+
+    // Find user
+    const result = await pool.query(
+      `SELECT id, name, email, password, role
+       FROM users
+       WHERE email = $1`,
+      [email]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({
+        message: "Invalid email or password",
+      });
+    }
+
+    const user = result.rows[0];
+
+    // Compare password
+    const passwordMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    if (!passwordMatch) {
+      return res.status(401).json({
+        message: "Invalid email or password",
+      });
+    }
+
+    // Create JWT token
+    const token = jwt.sign(
+      {
+        id: user.id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    // Don't send password back
+    delete user.password;
+
+    res.json({
+      message: "Login successful",
+      token,
+      user,
+    });
+
+  } catch (error) {
+    console.error("Login error:", error);
+
+    res.status(500).json({
+      message: "Login failed",
+    });
+  }
+});
+
+
 module.exports = router;
+

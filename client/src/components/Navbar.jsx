@@ -4,8 +4,10 @@ function Navbar() {
   return (
     <header className="navbar">
       <div className="navbar-container">
+
         <Link to="/" className="logo">
-          CivicConnect
+          <span className="logo-mark">C</span>
+          <span>CivicConnect</span>
         </Link>
 
         <nav className="nav-links">
@@ -20,10 +22,11 @@ function Navbar() {
             Log in
           </Link>
 
-          <Link to="/register" className="btn btn-primary">
-            Get Started
+          <Link to="/report" className="btn btn-primary">
+            Report an Issue
           </Link>
         </div>
+
       </div>
     </header>
   );

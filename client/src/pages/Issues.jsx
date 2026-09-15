@@ -1,100 +1,127 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import IssueCard from "../components/IssueCard";
 
-const sampleIssues = [
-  {
-    id: 1,
-    title: "Large pothole near main road",
-    description:
-      "A large pothole has developed near the main road and is causing problems for vehicles and pedestrians.",
-    category: "Roads",
-    location: "Indiranagar",
-    status: "Reported",
-    supports: 24,
-    date: "2 days ago",
-    image:
-      "https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 2,
-    title: "Garbage not collected regularly",
-    description:
-      "Garbage has not been collected for several days in our neighbourhood. The waste is starting to pile up.",
-    category: "Garbage",
-    location: "Whitefield",
-    status: "In Progress",
-    supports: 41,
-    date: "4 days ago",
-    image:
-      "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 3,
-    title: "Streetlight not working",
-    description:
-      "The streetlight near the park has stopped working, making the area difficult to navigate at night.",
-    category: "Streetlights",
-    location: "Koramangala",
-    status: "Verified",
-    supports: 18,
-    date: "1 week ago",
-    image:
-      "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 4,
-    title: "Water leakage on roadside",
-    description:
-      "A water pipe appears to be leaking continuously and water is collecting along the roadside.",
-    category: "Water",
-    location: "HSR Layout",
-    status: "Resolved",
-    supports: 32,
-    date: "1 week ago",
-    image:
-      "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 5,
-    title: "BBMP garbage truck missed collection",
-    description:
-      "The garbage collection vehicle has not visited this street for the last three scheduled collections.",
-    category: "Garbage",
-    location: "Jayanagar",
-    status: "Reported",
-    supports: 15,
-    date: "3 days ago",
-    image:
-      "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 6,
-    title: "Damaged footpath",
-    description:
-      "Several sections of the footpath are damaged, making it difficult for pedestrians to walk safely.",
-    category: "Roads",
-    location: "Malleshwaram",
-    status: "In Progress",
-    supports: 27,
-    date: "5 days ago",
-    image:
-      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80",
-  },
-];
+function formatStatus(status) {
+  if (!status) return "Reported";
+
+  return status
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function formatDate(date) {
+  if (!date) return "";
+
+  const createdDate = new Date(date);
+  const now = new Date();
+
+  const differenceInSeconds = Math.floor(
+    (now - createdDate) / 1000
+  );
+
+  const differenceInMinutes = Math.floor(
+    differenceInSeconds / 60
+  );
+
+  const differenceInHours = Math.floor(
+    differenceInMinutes / 60
+  );
+
+  const differenceInDays = Math.floor(
+    differenceInHours / 24
+  );
+
+  if (differenceInMinutes < 1) {
+    return "Just now";
+  }
+
+  if (differenceInMinutes < 60) {
+    return `${differenceInMinutes} ${
+      differenceInMinutes === 1 ? "minute" : "minutes"
+    } ago`;
+  }
+
+  if (differenceInHours < 24) {
+    return `${differenceInHours} ${
+      differenceInHours === 1 ? "hour" : "hours"
+    } ago`;
+  }
+
+  if (differenceInDays < 7) {
+    return `${differenceInDays} ${
+      differenceInDays === 1 ? "day" : "days"
+    } ago`;
+  }
+
+  return createdDate.toLocaleDateString();
+}
 
 function Issues() {
+  const [issues, setIssues] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [status, setStatus] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const filteredIssues = sampleIssues.filter((issue) => {
+  useEffect(() => {
+    const fetchIssues = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(
+          "http://localhost:5000/api/issues"
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message || "Failed to fetch issues"
+          );
+        }
+
+        const formattedIssues = data.issues.map((issue) => ({
+          id: issue.id,
+          title: issue.title,
+          description: issue.description,
+          category: issue.category,
+          location: issue.address || "Location not provided",
+          status: formatStatus(issue.status),
+          supports: 0,
+          date: formatDate(issue.created_at),
+          image:
+            issue.image_url ||
+            "https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=800&q=80",
+        }));
+
+        setIssues(formattedIssues);
+      } catch (error) {
+        console.error("Error fetching issues:", error);
+        setError(
+          error.message || "Unable to load community issues."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIssues();
+  }, []);
+
+  const filteredIssues = issues.filter((issue) => {
+    const searchText = search.toLowerCase();
+
     const matchesSearch =
-      issue.title.toLowerCase().includes(search.toLowerCase()) ||
-      issue.description.toLowerCase().includes(search.toLowerCase()) ||
-      issue.location.toLowerCase().includes(search.toLowerCase());
+      issue.title.toLowerCase().includes(searchText) ||
+      issue.description.toLowerCase().includes(searchText) ||
+      issue.location.toLowerCase().includes(searchText);
 
     const matchesCategory =
       category === "All" || issue.category === category;
@@ -112,13 +139,15 @@ function Issues() {
       <main className="issues-page">
         <section className="issues-header">
           <div>
-            <span className="section-badge">Community Issues</span>
+            <span className="section-badge">
+              Community Issues
+            </span>
 
             <h1>Issues reported by your community</h1>
 
             <p>
-              Discover civic problems around you, support issues that matter,
-              and follow their progress.
+              Discover civic problems around you, support issues that
+              matter, and follow their progress.
             </p>
           </div>
 
@@ -147,8 +176,15 @@ function Issues() {
               <option value="All">All Categories</option>
               <option value="Roads">Roads</option>
               <option value="Garbage">Garbage</option>
-              <option value="Streetlights">Streetlights</option>
+              <option value="Streetlights">
+                Streetlights
+              </option>
               <option value="Water">Water</option>
+              <option value="Drainage">Drainage</option>
+              <option value="Public Safety">
+                Public Safety
+              </option>
+              <option value="Other">Other</option>
             </select>
 
             <select
@@ -158,8 +194,13 @@ function Issues() {
               <option value="All">All Statuses</option>
               <option value="Reported">Reported</option>
               <option value="Verified">Verified</option>
-              <option value="In Progress">In Progress</option>
+              <option value="In Progress">
+                In Progress
+              </option>
               <option value="Resolved">Resolved</option>
+              <option value="Closed">Closed</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Duplicate">Duplicate</option>
             </select>
           </div>
         </section>
@@ -167,26 +208,52 @@ function Issues() {
         <section className="issues-results">
           <div className="results-header">
             <h2>
-              {filteredIssues.length}{" "}
-              {filteredIssues.length === 1 ? "Issue" : "Issues"}
+              {loading
+                ? "Loading..."
+                : `${filteredIssues.length} ${
+                    filteredIssues.length === 1
+                      ? "Issue"
+                      : "Issues"
+                  }`}
             </h2>
 
-            <span>Latest reports from the community</span>
+            <span>
+              Latest reports from the community
+            </span>
           </div>
 
-          {filteredIssues.length > 0 ? (
+          {loading ? (
+            <div className="no-issues">
+              <div className="no-issues-icon">⏳</div>
+              <h3>Loading issues...</h3>
+              <p>
+                We're getting the latest reports from the community.
+              </p>
+            </div>
+          ) : error ? (
+            <div className="no-issues">
+              <div className="no-issues-icon">⚠️</div>
+              <h3>Unable to load issues</h3>
+              <p>{error}</p>
+            </div>
+          ) : filteredIssues.length > 0 ? (
             <div className="issues-grid">
               {filteredIssues.map((issue) => (
-                <IssueCard key={issue.id} issue={issue} />
+                <IssueCard
+                  key={issue.id}
+                  issue={issue}
+                />
               ))}
             </div>
           ) : (
             <div className="no-issues">
               <div className="no-issues-icon">🔍</div>
+
               <h3>No issues found</h3>
+
               <p>
-                Try changing your search or filters to find other community
-                issues.
+                Try changing your search or filters to find other
+                community issues.
               </p>
             </div>
           )}

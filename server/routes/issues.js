@@ -1,9 +1,95 @@
 const express = require("express");
 const router = express.Router();
-
 const pool = require("../db");
+const authenticateToken = require("../middleware/authMiddleware");
 
-router.post("/", async (req, res) => {
+router.get("/", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT
+        issues.*,
+        users.name AS reporter_name
+       FROM issues
+       JOIN users ON issues.reported_by = users.id
+       ORDER BY issues.created_at DESC`
+    );
+
+    res.json({
+      issues: result.rows,
+    });
+
+  } catch (error) {
+    console.error("Error fetching issues:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch issues",
+    });
+  }
+});
+
+router.post("/:id/support", authenticateToken, async (req, res) => {
+  try {
+    const issueId = req.params.id;
+    const userId = req.user.id;
+
+    // Check whether the issue exists
+    const issueResult = await pool.query(
+      "SELECT id FROM issues WHERE id = $1",
+      [issueId]
+    );
+
+    if (issueResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Issue not found",
+      });
+    }
+
+    // Check whether this user has already supported the issue
+    const existingSupport = await pool.query(
+      `SELECT id
+       FROM issue_support
+       WHERE issue_id = $1 AND user_id = $2`,
+      [issueId, userId]
+    );
+
+    if (existingSupport.rows.length > 0) {
+      return res.status(409).json({
+        message: "You have already supported this issue",
+      });
+    }
+
+    // Add support
+    await pool.query(
+      `INSERT INTO issue_support (issue_id, user_id)
+       VALUES ($1, $2)`,
+      [issueId, userId]
+    );
+
+    // Get updated support count
+    const countResult = await pool.query(
+      `SELECT COUNT(*) AS support_count
+       FROM issue_support
+       WHERE issue_id = $1`,
+      [issueId]
+    );
+
+    res.status(201).json({
+      message: "Issue supported successfully",
+      supportCount: Number(countResult.rows[0].support_count),
+    });
+
+  } catch (error) {
+    console.error("Error supporting issue:", error);
+
+    res.status(500).json({
+      message: "Failed to support issue",
+    });
+  }
+});
+
+
+
+router.post("/", authenticateToken, async (req, res) => {
   try {
     const {
       title,
@@ -13,12 +99,29 @@ router.post("/", async (req, res) => {
       latitude,
       longitude,
       address,
-      reported_by,
     } = req.body;
+
+    // The logged-in user's ID comes from the verified JWT.
+    const reportedBy = req.user.id;
+
+    if (!title || !description || !category) {
+      return res.status(400).json({
+        message: "Title, description and category are required",
+      });
+    }
 
     const result = await pool.query(
       `INSERT INTO issues
-      (title, description, category, image_url, latitude, longitude, address, reported_by)
+      (
+        title,
+        description,
+        category,
+        image_url,
+        latitude,
+        longitude,
+        address,
+        reported_by
+      )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *`,
       [
@@ -29,7 +132,7 @@ router.post("/", async (req, res) => {
         latitude || null,
         longitude || null,
         address || null,
-        reported_by,
+        reportedBy,
       ]
     );
 
@@ -37,6 +140,7 @@ router.post("/", async (req, res) => {
       message: "Issue reported successfully",
       issue: result.rows[0],
     });
+
   } catch (error) {
     console.error("Error creating issue:", error);
 

@@ -5,6 +5,7 @@ require("dotenv").config();
 const pool = require("./db");
 const issuesRoutes = require("./routes/issues");
 const authRoutes = require("./routes/auth");
+const neighbourhoodsRoutes = require("./routes/neighbourhoods");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -13,6 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/issues", issuesRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/neighbourhoods", neighbourhoodsRoutes);
 
 app.get("/", async (req, res) => {
   try {

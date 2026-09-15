@@ -1,128 +1,260 @@
+import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Link } from "react-router-dom";
 
 function Home() {
   return (
     <>
       <Navbar />
 
-      <main>
-        <section className="hero">
-          <div className="hero-content">
-            <span className="hero-badge">
-              Making communities better, together
-            </span>
+      <main className="home-page">
 
-            <h1>
-              Your voice can change
-              <span> your community.</span>
-            </h1>
+        {/* Hero Section */}
+        <section className="hero-section">
+          <div className="container hero-container">
 
-            <p>
-              Report local issues, connect with your neighbours, and work
-              together to make your neighbourhood a better place.
-            </p>
+            <div className="hero-content">
+              <span className="hero-badge">
+                🏙️ Building better communities together
+              </span>
 
-            <div className="hero-buttons">
-              <Link to="/report" className="btn btn-primary">
-                Report an Issue
-              </Link>
+              <h1>
+                Report local issues.
+                <br />
+                <span>Make your community better.</span>
+              </h1>
 
-              <Link to="/issues" className="btn btn-secondary">
-                Explore Issues
-              </Link>
-            </div>
-          </div>
+              <p>
+                CivicConnect helps citizens report civic problems,
+                connect with their neighbourhood, and work together
+                to get issues resolved.
+              </p>
 
-          <div className="map-card">
-            <div className="map-header">
-              <div>
-                <strong>Community Issues</strong>
-                <p>Nearby reports</p>
+              <div className="hero-actions">
+                <Link to="/report" className="btn btn-primary hero-button">
+                  Report an Issue →
+                </Link>
+
+                <Link to="/issues" className="btn btn-secondary hero-button">
+                  Explore Issues
+                </Link>
               </div>
-              <span className="live-badge">● Live</span>
+
+              <div className="hero-trust">
+                <span>✓ Easy to report</span>
+                <span>✓ Community verified</span>
+                <span>✓ Track progress</span>
+              </div>
             </div>
 
-            <div className="map-area">
-              <div className="map-pin pin-one">📍</div>
-              <div className="map-pin pin-two">📍</div>
-              <div className="map-pin pin-three">📍</div>
+            <div className="hero-visual">
+              <div className="hero-map-card">
 
-              <div className="map-label label-one">Pothole</div>
-              <div className="map-label label-two">Streetlight</div>
-              <div className="map-label label-three">Garbage</div>
+                <div className="map-top">
+                  <div>
+                    <strong>Community Issues</strong>
+                    <span>Nearby civic problems</span>
+                  </div>
+
+                  <span className="map-status">LIVE</span>
+                </div>
+
+                <div className="fake-map">
+
+                  <div className="map-road road-1"></div>
+                  <div className="map-road road-2"></div>
+                  <div className="map-road road-3"></div>
+
+                  <div className="map-marker marker-1">📍</div>
+                  <div className="map-marker marker-2">📍</div>
+                  <div className="map-marker marker-3">📍</div>
+
+                  <div className="map-location">
+                    <strong>12 active issues</strong>
+                    <span>in your community</span>
+                  </div>
+
+                </div>
+
+              </div>
             </div>
+
           </div>
         </section>
 
-        <section className="stats">
-          <div>
-            <strong>1,200+</strong>
-            <span>Issues Reported</span>
-          </div>
+        {/* Stats */}
+        <section className="stats-section">
+          <div className="container stats-grid">
 
-          <div>
-            <strong>850+</strong>
-            <span>Issues Resolved</span>
-          </div>
+            <div className="stat-card">
+              <strong>1,250+</strong>
+              <span>Issues Reported</span>
+            </div>
 
-          <div>
-            <strong>25+</strong>
-            <span>Communities</span>
+            <div className="stat-card">
+              <strong>840+</strong>
+              <span>Issues Resolved</span>
+            </div>
+
+            <div className="stat-card">
+              <strong>35+</strong>
+              <span>Neighbourhoods</span>
+            </div>
+
+            <div className="stat-card">
+              <strong>4,500+</strong>
+              <span>Citizens Connected</span>
+            </div>
+
           </div>
         </section>
 
-        <section className="features" id="about">
-          <div className="section-heading">
-            <span>HOW IT WORKS</span>
-            <h2>One platform. A stronger community.</h2>
+        {/* How it works */}
+        <section className="section">
+          <div className="container">
+
+            <div className="section-header centered">
+              <span className="section-label">HOW IT WORKS</span>
+
+              <h2>
+                From problem to solution
+              </h2>
+
+              <p>
+                CivicConnect makes it simple for citizens to bring
+                local problems to attention and work together to solve them.
+              </p>
+            </div>
+
+            <div className="steps-grid">
+
+              <div className="step-card">
+                <div className="step-number">01</div>
+
+                <div className="step-icon">📸</div>
+
+                <h3>Report an issue</h3>
+
+                <p>
+                  Take a photo, describe the problem and mark its
+                  exact location on the map.
+                </p>
+              </div>
+
+              <div className="step-card">
+                <div className="step-number">02</div>
+
+                <div className="step-icon">🤝</div>
+
+                <h3>Get community support</h3>
+
+                <p>
+                  Nearby residents can verify the issue and support
+                  reports that affect their neighbourhood.
+                </p>
+              </div>
+
+              <div className="step-card">
+                <div className="step-number">03</div>
+
+                <div className="step-icon">🏛️</div>
+
+                <h3>Track resolution</h3>
+
+                <p>
+                  Follow the issue as authorities review, work on
+                  and eventually resolve the problem.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        {/* Community Section */}
+        <section className="community-section">
+          <div className="container community-container">
+
+            <div className="community-content">
+              <span className="section-label">
+                YOUR NEIGHBOURHOOD
+              </span>
+
+              <h2>
+                Your community has a voice.
+              </h2>
+
+              <p>
+                Join your neighbourhood community, discuss local
+                problems and help verify issues reported by people
+                around you.
+              </p>
+
+              <Link to="/community" className="btn btn-primary">
+                Explore Community →
+              </Link>
+            </div>
+
+            <div className="community-card">
+
+              <div className="community-card-header">
+                <div className="community-avatar">
+                  N
+                </div>
+
+                <div>
+                  <strong>Neighbourhood Community</strong>
+                  <span>1,248 members</span>
+                </div>
+              </div>
+
+              <div className="community-issue">
+                <span className="issue-dot"></span>
+
+                <div>
+                  <strong>Large pothole near main road</strong>
+                  <span>23 residents support this issue</span>
+                </div>
+              </div>
+
+              <div className="community-issue">
+                <span className="issue-dot"></span>
+
+                <div>
+                  <strong>Streetlight not working</strong>
+                  <span>16 residents support this issue</span>
+                </div>
+              </div>
+
+              <div className="community-footer">
+                <span>✓ Community verified</span>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="cta-section">
+          <div className="container cta-container">
+
+            <h2>
+              See a problem in your community?
+            </h2>
+
             <p>
-              CivicConnect makes it easier for citizens and authorities to
-              work together on local problems.
+              Report it today and help make your neighbourhood better.
             </p>
-          </div>
 
-          <div className="feature-grid">
-            <div className="feature-card">
-              <div className="feature-icon">📢</div>
-              <h3>Report Issues</h3>
-              <p>
-                Report potholes, garbage, broken streetlights, water leaks,
-                and other civic problems with photos and location.
-              </p>
-            </div>
+            <Link to="/report" className="btn btn-primary cta-button">
+              Report an Issue →
+            </Link>
 
-            <div className="feature-card">
-              <div className="feature-icon">👥</div>
-              <h3>Build Community</h3>
-              <p>
-                Connect with people in your neighbourhood and support issues
-                that affect your community.
-              </p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">📈</div>
-              <h3>Track Progress</h3>
-              <p>
-                Follow your reported issues and see how authorities respond
-                and resolve them.
-              </p>
-            </div>
           </div>
         </section>
 
-        <section className="cta">
-          <h2>Let's make your neighbourhood better.</h2>
-          <p>
-            Start reporting issues and connect with your community today.
-          </p>
-
-          <Link to="/register" className="btn btn-primary">
-            Join CivicConnect
-          </Link>
-        </section>
       </main>
 
       <Footer />

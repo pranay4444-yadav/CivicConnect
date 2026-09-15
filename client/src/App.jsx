@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Issues from "./pages/Issues";
 import ReportIssue from "./pages/ReportIssue";
+import Community from "./pages/Community";
 import "./App.css";
 
 
@@ -17,6 +18,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/issues" element={<Issues />} />
         <Route path="/report" element={<ReportIssue />} />
+        <Route path="/community" element={<Community />} />
       </Routes>
     </BrowserRouter>
   );

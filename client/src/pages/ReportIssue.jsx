@@ -16,6 +16,7 @@ function ReportIssue() {
   });
 
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,15 +35,80 @@ function ReportIssue() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Issue submitted:", formData);
-    console.log("Image:", image);
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
 
-    alert(
-      "Issue submitted successfully! Backend connection will be added later."
-    );
+    // Check if user is logged in
+    if (!token || !user) {
+      alert("Please log in before reporting an issue.");
+      return;
+    }
+
+    // Make sure a location has been selected
+    if (!formData.latitude || !formData.longitude) {
+      alert("Please select the issue location on the map.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/issues",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: formData.title,
+            description: formData.description,
+            category: formData.category,
+            latitude: formData.latitude,
+            longitude: formData.longitude,
+            address: formData.location,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to report issue."
+        );
+      }
+
+      console.log("Issue created:", data);
+
+      alert("Issue reported successfully!");
+
+      // Reset form
+      setFormData({
+        title: "",
+        category: "",
+        description: "",
+        location: "",
+        neighbourhood: "",
+        latitude: null,
+        longitude: null,
+      });
+
+      setImage(null);
+
+    } catch (error) {
+      console.error("Error reporting issue:", error);
+
+      alert(
+        error.message || "Something went wrong while reporting the issue."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -97,10 +163,14 @@ function ReportIssue() {
                   <option value="">Select a category</option>
                   <option value="Roads">Roads</option>
                   <option value="Garbage">Garbage</option>
-                  <option value="Streetlights">Streetlights</option>
+                  <option value="Streetlights">
+                    Streetlights
+                  </option>
                   <option value="Water">Water</option>
                   <option value="Drainage">Drainage</option>
-                  <option value="Public Safety">Public Safety</option>
+                  <option value="Public Safety">
+                    Public Safety
+                  </option>
                   <option value="Other">Other</option>
                 </select>
               </div>
@@ -148,7 +218,9 @@ function ReportIssue() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="neighbourhood">Neighbourhood</label>
+                <label htmlFor="neighbourhood">
+                  Neighbourhood
+                </label>
 
                 <input
                   type="text"
@@ -205,14 +277,24 @@ function ReportIssue() {
 
             {/* Actions */}
             <div className="report-actions">
-              <Link to="/issues" className="btn btn-secondary">
+              <Link
+                to="/issues"
+                className="btn btn-secondary"
+              >
                 Cancel
               </Link>
 
-              <button type="submit" className="btn btn-primary">
-                Submit Issue
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading
+                  ? "Submitting..."
+                  : "Submit Issue"}
               </button>
             </div>
+
           </form>
 
           {/* Information Sidebar */}
@@ -224,9 +306,18 @@ function ReportIssue() {
                 <li>
                   Make sure the issue has not already been reported.
                 </li>
-                <li>Provide an accurate location.</li>
-                <li>Add a clear photo whenever possible.</li>
-                <li>Describe how the issue affects residents.</li>
+
+                <li>
+                  Provide an accurate location.
+                </li>
+
+                <li>
+                  Add a clear photo whenever possible.
+                </li>
+
+                <li>
+                  Describe how the issue affects residents.
+                </li>
               </ul>
             </div>
 
@@ -237,9 +328,9 @@ function ReportIssue() {
                 <h3>Community verification</h3>
 
                 <p>
-                  Nearby residents will be able to support and verify genuine
-                  issues. This helps CivicConnect highlight problems that
-                  affect the community.
+                  Nearby residents will be able to support and verify
+                  genuine issues. This helps CivicConnect highlight
+                  problems that affect the community.
                 </p>
               </div>
             </div>
@@ -253,4 +344,3 @@ function ReportIssue() {
 }
 
 export default ReportIssue;
-
