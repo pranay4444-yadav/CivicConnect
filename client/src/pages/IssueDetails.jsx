@@ -14,6 +14,29 @@ function IssueDetails() {
 
   const [statusHistory, setStatusHistory] = useState([]);
 
+  const [userRole, setUserRole] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [statusComment, setStatusComment] = useState("");
+  const [statusUpdating, setStatusUpdating] = useState(false);
+
+  useEffect(() => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return;
+  }
+
+  try {
+    const payload = JSON.parse(
+      atob(token.split(".")[1])
+    );
+
+    setUserRole(payload.role || "");
+  } catch (error) {
+    console.error("Unable to read user role:", error);
+  }
+}, []);
+
   useEffect(() => {
     const fetchIssue = async () => {
       try {
@@ -171,6 +194,78 @@ function IssueDetails() {
       alert("Unable to verify this issue.");
     }
   };
+
+  // =========================
+// Authority Status Update
+// =========================
+
+const handleStatusUpdate = async () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("Please log in to update the issue status.");
+    return;
+  }
+
+  if (!selectedStatus) {
+    alert("Please select a status.");
+    return;
+  }
+
+  try {
+    setStatusUpdating(true);
+
+    const response = await fetch(
+      `http://localhost:5000/api/issues/${issue.id}/status`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          status: selectedStatus,
+          comment: statusComment.trim(),
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Unable to update issue status.");
+      return;
+    }
+
+    // Update current issue status
+    setIssue((currentIssue) => ({
+      ...currentIssue,
+      status: data.issue.status,
+      updated_at: data.issue.updated_at,
+    }));
+
+    // Refresh status history
+    const historyResponse = await fetch(
+      `http://localhost:5000/api/issues/${issue.id}/status-history`
+    );
+
+    const historyData = await historyResponse.json();
+
+    if (historyResponse.ok) {
+      setStatusHistory(historyData.history || []);
+    }
+
+    setSelectedStatus("");
+    setStatusComment("");
+
+    alert("Issue status updated successfully!");
+  } catch (error) {
+    console.error("Status update error:", error);
+    alert("Unable to update issue status.");
+  } finally {
+    setStatusUpdating(false);
+  }
+};
 
   // =========================
   // Loading State
@@ -501,6 +596,95 @@ function IssueDetails() {
               </div>
 
             </div>
+
+            {/* Authority Actions */}
+
+{(userRole === "AUTHORITY" || userRole === "ADMIN") && (
+  <div className="issue-info-card authority-actions-card">
+
+    <h3>Authority Actions</h3>
+
+    <p className="authority-actions-description">
+      Update the status of this civic issue and add an official note.
+    </p>
+
+    <label className="authority-field-label">
+      Change Status
+    </label>
+
+    <select
+      value={selectedStatus}
+      onChange={(e) => setSelectedStatus(e.target.value)}
+      className="authority-status-select"
+      disabled={statusUpdating}
+    >
+      <option value="">
+        Select new status
+      </option>
+
+      <option value="REPORTED">
+        Reported
+      </option>
+
+      <option value="UNDER REVIEW">
+        Under Review
+      </option>
+
+      <option value="VERIFIED">
+        Verified
+      </option>
+
+      <option value="ASSIGNED">
+        Assigned
+      </option>
+
+      <option value="IN PROGRESS">
+        In Progress
+      </option>
+
+      <option value="RESOLVED">
+        Resolved
+      </option>
+
+      <option value="CLOSED">
+        Closed
+      </option>
+
+      <option value="REJECTED">
+        Rejected
+      </option>
+
+      <option value="DUPLICATE">
+        Duplicate
+      </option>
+    </select>
+
+    <label className="authority-field-label">
+      Authority Note
+    </label>
+
+    <textarea
+      value={statusComment}
+      onChange={(e) => setStatusComment(e.target.value)}
+      placeholder="Add a note about this status update..."
+      rows="4"
+      className="authority-status-comment"
+      disabled={statusUpdating}
+    />
+
+    <button
+      type="button"
+      className="btn btn-primary authority-update-btn"
+      onClick={handleStatusUpdate}
+      disabled={statusUpdating || !selectedStatus}
+    >
+      {statusUpdating
+        ? "Updating..."
+        : "Update Status"}
+    </button>
+
+  </div>
+)}
 
             {/* Reported Date */}
 

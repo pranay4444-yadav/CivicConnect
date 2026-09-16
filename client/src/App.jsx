@@ -6,6 +6,7 @@ import Issues from "./pages/Issues";
 import ReportIssue from "./pages/ReportIssue";
 import Community from "./pages/Community";
 import IssueDetails from "./pages/IssueDetails";
+import AuthorityDashboard from "./pages/AuthorityDashboard";
 import "./App.css";
 
 
@@ -21,6 +22,7 @@ function App() {
         <Route path="/report" element={<ReportIssue />} />
         <Route path="/community" element={<Community />} />
         <Route path="/issues/:id" element={<IssueDetails />} />
+        <Route path="/authority" element={<AuthorityDashboard />} />
       </Routes>
     </BrowserRouter>
   );

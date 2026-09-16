@@ -6,13 +6,26 @@ const authenticateToken = require("../middleware/authMiddleware");
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT
-        issues.*,
-        users.name AS reporter_name
-       FROM issues
-       JOIN users ON issues.reported_by = users.id
-       ORDER BY issues.created_at DESC`
-    );
+  `SELECT
+    issues.*,
+    users.name AS reporter_name,
+
+    (
+      SELECT COUNT(*)
+      FROM issue_support
+      WHERE issue_support.issue_id = issues.id
+    ) AS support_count,
+
+    (
+      SELECT COUNT(*)
+      FROM issue_verifications
+      WHERE issue_verifications.issue_id = issues.id
+    ) AS verification_count
+
+   FROM issues
+   JOIN users ON issues.reported_by = users.id
+   ORDER BY issues.created_at DESC`
+);
 
     res.json({
       issues: result.rows,
