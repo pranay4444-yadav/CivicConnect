@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require("../db");
 const authenticateToken = require("../middleware/authMiddleware");
 
+
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(
@@ -40,6 +41,36 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/authorities/list", authenticateToken, async (req, res) => {
+  try {
+    const userRole = req.user.role;
+
+    if (userRole !== "AUTHORITY" && userRole !== "ADMIN") {
+      return res.status(403).json({
+        message: "Only authorities and admins can view authority users",
+      });
+    }
+
+    const result = await pool.query(
+      `SELECT id, name, email
+       FROM users
+       WHERE role = 'AUTHORITY'
+       ORDER BY name ASC`
+    );
+
+    res.json({
+      authorities: result.rows,
+    });
+
+  } catch (error) {
+    console.error("Error fetching authorities:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch authorities",
+    });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const issueId = req.params.id;
@@ -48,11 +79,15 @@ router.get("/:id", async (req, res) => {
       `SELECT
         issues.*,
         users.name AS reporter_name,
-        neighbourhoods.name AS neighbourhood_name
+        neighbourhoods.name AS neighbourhood_name,
+        assigned_user.name AS assigned_authority_name,
+        assigned_user.email AS assigned_authority_email
        FROM issues
        JOIN users ON issues.reported_by = users.id
        LEFT JOIN neighbourhoods
         ON issues.neighbourhood_id = neighbourhoods.id
+       LEFT JOIN users AS assigned_user
+        ON issues.assigned_to = assigned_user.id 
        WHERE issues.id = $1`,
       [issueId]
     );
@@ -213,6 +248,68 @@ router.post("/:id/comments", authenticateToken, async (req, res) => {
 
     res.status(500).json({
       message: "Failed to add comment",
+    });
+  }
+});
+
+router.patch("/:id/assign", authenticateToken, async (req, res) => {
+  try {
+    const issueId = req.params.id;
+    const userRole = req.user.role;
+    const { assigned_to } = req.body;
+
+    if (userRole !== "AUTHORITY" && userRole !== "ADMIN") {
+      return res.status(403).json({
+        message: "Only authorities and admins can assign issues",
+      });
+    }
+
+    if (!assigned_to) {
+      return res.status(400).json({
+        message: "Assigned authority is required",
+      });
+    }
+
+    const authorityResult = await pool.query(
+      `SELECT id, name, email, role
+       FROM users
+       WHERE id = $1
+       AND role = 'AUTHORITY'`,
+      [assigned_to]
+    );
+
+    if (authorityResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Authority user not found",
+      });
+    }
+
+    const issueResult = await pool.query(
+      `UPDATE issues
+       SET assigned_to = $1,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2
+       RETURNING id, assigned_to, updated_at`,
+      [assigned_to, issueId]
+    );
+
+    if (issueResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Issue not found",
+      });
+    }
+
+    res.json({
+      message: "Issue assigned successfully",
+      issue: issueResult.rows[0],
+      assigned_authority: authorityResult.rows[0],
+    });
+
+  } catch (error) {
+    console.error("Error assigning issue:", error);
+
+    res.status(500).json({
+      message: "Failed to assign issue",
     });
   }
 });

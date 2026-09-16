@@ -42,7 +42,7 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       // Go to issues page after successful login
-      navigate("/issues");
+      navigate("/");
 
     } catch (error) {
       setError(error.message);

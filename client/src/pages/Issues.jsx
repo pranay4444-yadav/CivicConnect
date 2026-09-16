@@ -88,18 +88,23 @@ function Issues() {
         }
 
         const formattedIssues = data.issues.map((issue) => ({
-          id: issue.id,
-          title: issue.title,
-          description: issue.description,
-          category: issue.category,
-          location: issue.address || "Location not provided",
-          status: formatStatus(issue.status),
-          supports: 0,
-          date: formatDate(issue.created_at),
-          image:
-            issue.image_url ||
-            "https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=800&q=80",
-        }));
+  id: issue.id,
+  title: issue.title,
+  description: issue.description,
+  category: issue.category,
+  location: issue.address || "Location not provided",
+  status: formatStatus(issue.status),
+
+  // Use real database counts
+  supports: Number(issue.support_count || 0),
+  verifications: Number(issue.verification_count || 0),
+
+  date: formatDate(issue.created_at),
+
+  image:
+    issue.image_url ||
+    "https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=800&q=80",
+}));
 
         setIssues(formattedIssues);
       } catch (error) {

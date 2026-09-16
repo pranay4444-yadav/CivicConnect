@@ -73,9 +73,20 @@ function IssueCard({ issue }) {
         </div>
 
         <div className="issue-meta">
-          <span>👍 {supportCount} supports</span>
-          <span>🕒 {issue.date}</span>
-        </div>
+
+  <span>
+    👍 {supportCount} supports
+  </span>
+
+  <span>
+    🛡️ {issue.verifications || 0} verified
+  </span>
+
+  <span>
+    🕒 {issue.date}
+  </span>
+
+</div>
 
         <div className="issue-card-actions">
           <button
