@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -9,7 +9,26 @@ import IssueDetails from "./pages/IssueDetails";
 import AuthorityDashboard from "./pages/AuthorityDashboard";
 import "./App.css";
 
+function ProtectedRoute({ children, allowedRoles }) {
+  const token = localStorage.getItem("token");
 
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+
+    if (!allowedRoles.includes(payload.role)) {
+      return <Navigate to="/" replace />;
+    }
+
+    return children;
+  } catch (error) {
+    console.error("Invalid token:", error);
+    return <Navigate to="/login" replace />;
+  }
+}
 
 function App() {
   return (
@@ -22,7 +41,14 @@ function App() {
         <Route path="/report" element={<ReportIssue />} />
         <Route path="/community" element={<Community />} />
         <Route path="/issues/:id" element={<IssueDetails />} />
-        <Route path="/authority" element={<AuthorityDashboard />} />
+        <Route
+          path="/authority"
+          element={
+            <ProtectedRoute allowedRoles={["AUTHORITY", "ADMIN"]}>
+            <AuthorityDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
