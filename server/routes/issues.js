@@ -115,6 +115,40 @@ router.get("/:id/comments", async (req, res) => {
   }
 });
 
+router.get("/:id/status-history", async (req, res) => {
+  try {
+    const issueId = req.params.id;
+
+    const result = await pool.query(
+      `SELECT
+        status_history.id,
+        status_history.issue_id,
+        status_history.status,
+        status_history.comment,
+        status_history.changed_at,
+        users.name AS changed_by_name,
+        users.role AS changed_by_role
+       FROM status_history
+       JOIN users
+         ON status_history.changed_by = users.id
+       WHERE status_history.issue_id = $1
+       ORDER BY status_history.changed_at ASC`,
+      [issueId]
+    );
+
+    res.json({
+      history: result.rows,
+    });
+
+  } catch (error) {
+    console.error("Error fetching status history:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch status history",
+    });
+  }
+});
+
 router.post("/:id/comments", authenticateToken, async (req, res) => {
   try {
     const issueId = req.params.id;
@@ -166,6 +200,91 @@ router.post("/:id/comments", authenticateToken, async (req, res) => {
 
     res.status(500).json({
       message: "Failed to add comment",
+    });
+  }
+});
+
+router.patch("/:id/status", authenticateToken, async (req, res) => {
+  try {
+    const issueId = req.params.id;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    const { status, comment } = req.body;
+
+    // Only authorities and admins can update issue status
+    if (userRole !== "AUTHORITY" && userRole !== "ADMIN") {
+      return res.status(403).json({
+        message: "Only authorities and admins can update issue status",
+      });
+    }
+
+    const allowedStatuses = [
+      "REPORTED",
+      "UNDER REVIEW",
+      "VERIFIED",
+      "ASSIGNED",
+      "IN PROGRESS",
+      "RESOLVED",
+      "CLOSED",
+      "REJECTED",
+      "DUPLICATE",
+    ];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid issue status",
+      });
+    }
+
+    // Check whether the issue exists
+    const issueResult = await pool.query(
+      "SELECT id, status FROM issues WHERE id = $1",
+      [issueId]
+    );
+
+    if (issueResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Issue not found",
+      });
+    }
+
+    const currentStatus = issueResult.rows[0].status;
+
+    // Don't create unnecessary history entries
+    if (currentStatus === status) {
+      return res.status(400).json({
+        message: "Issue is already in this status",
+      });
+    }
+
+    // Update issue status
+    const updatedIssue = await pool.query(
+      `UPDATE issues
+       SET status = $1,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2
+       RETURNING id, status, updated_at`,
+      [status, issueId]
+    );
+
+    // Record status history
+    await pool.query(
+      `INSERT INTO status_history
+       (issue_id, status, changed_by, comment)
+       VALUES ($1, $2, $3, $4)`,
+      [issueId, status, userId, comment || null]
+    );
+
+    res.json({
+      message: "Issue status updated successfully",
+      issue: updatedIssue.rows[0],
+    });
+
+  } catch (error) {
+    console.error("Error updating issue status:", error);
+
+    res.status(500).json({
+      message: "Failed to update issue status",
     });
   }
 });
