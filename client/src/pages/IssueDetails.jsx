@@ -151,9 +151,56 @@ function IssueDetails() {
                 people currently support this issue.
               </p>
 
-              <button className="btn btn-primary">
-                👍 Support Issue
-              </button>
+              <div className="verification-count">
+                🛡️ {issue.verification_count || 0}
+              </div>
+
+              <p>
+                community members have verified this issue.
+              </p>
+
+              <button
+                className="btn btn-primary"
+                onClick={async () => {
+                 const token = localStorage.getItem("token");
+
+                 if (!token) {
+                  alert("Please log in to verify an issue.");
+                  return;
+                 } 
+
+                 try {
+                  const response = await fetch(
+                   `http://localhost:5000/api/issues/${issue.id}/verify`,
+                    {
+                      method: "POST",
+                      headers: {
+                       Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  );
+
+                  const data = await response.json();
+
+                  if (!response.ok) {
+                    alert(data.message || "Unable to verify this issue.");
+                    return;
+                  }
+
+                  setIssue((currentIssue) => ({
+                    ...currentIssue,
+                    verification_count: data.verificationCount,
+                  }));
+
+                  alert("Issue verified successfully!");
+                } catch (error) {
+                  console.error("Verification error:", error);
+                  alert("Unable to verify this issue.");
+                }
+              }}
+              >
+             🛡️ Verify Issue
+            </button>
             </div>
 
             <div className="issue-info-card">

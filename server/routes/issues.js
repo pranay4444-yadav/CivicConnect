@@ -57,11 +57,21 @@ router.get("/:id", async (req, res) => {
        WHERE issue_id = $1`,
       [issueId]
     );
-
+    
+    // Get verification count
+    const verificationResult = await pool.query(
+      `SELECT COUNT(*) AS verification_count
+       FROM issue_verifications
+       WHERE issue_id = $1`,
+      [issueId]
+    );
     res.json({
       issue: {
         ...result.rows[0],
         support_count: Number(supportResult.rows[0].support_count),
+        verification_count: Number(
+          verificationResult.rows[0].verification_count
+        ),
       },
     });
 
@@ -134,6 +144,67 @@ router.post("/:id/support", authenticateToken, async (req, res) => {
   }
 });
 
+router.post("/:id/verify", authenticateToken, async (req, res) => {
+  try {
+    const issueId = req.params.id;
+    const userId = req.user.id;
+
+    // Check whether the issue exists
+    const issueResult = await pool.query(
+      "SELECT id FROM issues WHERE id = $1",
+      [issueId]
+    );
+
+    if (issueResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Issue not found",
+      });
+    }
+
+    // Check whether this user has already verified the issue
+    const existingVerification = await pool.query(
+      `SELECT id
+       FROM issue_verifications
+       WHERE issue_id = $1 AND user_id = $2`,
+      [issueId, userId]
+    );
+
+    if (existingVerification.rows.length > 0) {
+      return res.status(409).json({
+        message: "You have already verified this issue",
+      });
+    }
+
+    // Add verification
+    await pool.query(
+      `INSERT INTO issue_verifications (issue_id, user_id)
+       VALUES ($1, $2)`,
+      [issueId, userId]
+    );
+
+    // Get updated verification count
+    const countResult = await pool.query(
+      `SELECT COUNT(*) AS verification_count
+       FROM issue_verifications
+       WHERE issue_id = $1`,
+      [issueId]
+    );
+
+    res.status(201).json({
+      message: "Issue verified successfully",
+      verificationCount: Number(
+        countResult.rows[0].verification_count
+      ),
+    });
+
+  } catch (error) {
+    console.error("Error verifying issue:", error);
+
+    res.status(500).json({
+      message: "Failed to verify issue",
+    });
+  }
+});
 
 
 router.post("/", authenticateToken, async (req, res) => {
