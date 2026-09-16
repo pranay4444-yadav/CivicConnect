@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -17,6 +17,34 @@ function ReportIssue() {
 
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [neighbourhoods, setNeighbourhoods] = useState([]);
+  const [loadingNeighbourhoods, setLoadingNeighbourhoods] = useState(true);
+
+  useEffect(() => {
+  const fetchNeighbourhoods = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/neighbourhoods"
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to fetch neighbourhoods"
+        );
+      }
+
+      setNeighbourhoods(data.neighbourhoods || []);
+    } catch (error) {
+      console.error("Error fetching neighbourhoods:", error);
+    } finally {
+      setLoadingNeighbourhoods(false);
+    }
+  };
+
+  fetchNeighbourhoods();
+}, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -71,7 +99,8 @@ function ReportIssue() {
             latitude: formData.latitude,
             longitude: formData.longitude,
             address: formData.location,
-          }),
+            neighbourhood_id: formData.neighbourhood,
+         }),
         }
       );
 
@@ -217,20 +246,35 @@ function ReportIssue() {
                 />
               </div>
 
+              
               <div className="form-group">
                 <label htmlFor="neighbourhood">
                   Neighbourhood
                 </label>
 
-                <input
-                  type="text"
+                <select
                   id="neighbourhood"
                   name="neighbourhood"
-                  placeholder="e.g. Indiranagar"
                   value={formData.neighbourhood}
                   onChange={handleChange}
                   required
-                />
+                  disabled={loadingNeighbourhoods}
+                >
+                <option value="">
+                    {loadingNeighbourhoods
+                      ? "Loading neighbourhoods..."
+                      : "Select your neighbourhood"}
+                </option>
+
+                {neighbourhoods.map((neighbourhood) => (
+                 <option
+                   key={neighbourhood.id}
+                   value={neighbourhood.id}
+                 >
+                   {neighbourhood.name}
+                 </option>
+                 ))}
+                </select>
               </div>
 
               <LocationPicker

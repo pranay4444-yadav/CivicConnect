@@ -27,6 +27,53 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  try {
+    const issueId = req.params.id;
+
+    const result = await pool.query(
+      `SELECT
+        issues.*,
+        users.name AS reporter_name,
+        neighbourhoods.name AS neighbourhood_name
+       FROM issues
+       JOIN users ON issues.reported_by = users.id
+       LEFT JOIN neighbourhoods
+        ON issues.neighbourhood_id = neighbourhoods.id
+       WHERE issues.id = $1`,
+      [issueId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Issue not found",
+      });
+    }
+
+    // Get support count
+    const supportResult = await pool.query(
+      `SELECT COUNT(*) AS support_count
+       FROM issue_support
+       WHERE issue_id = $1`,
+      [issueId]
+    );
+
+    res.json({
+      issue: {
+        ...result.rows[0],
+        support_count: Number(supportResult.rows[0].support_count),
+      },
+    });
+
+  } catch (error) {
+    console.error("Error fetching issue:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch issue",
+    });
+  }
+});
+
 router.post("/:id/support", authenticateToken, async (req, res) => {
   try {
     const issueId = req.params.id;
@@ -99,6 +146,7 @@ router.post("/", authenticateToken, async (req, res) => {
       latitude,
       longitude,
       address,
+      neighbourhood_id,
     } = req.body;
 
     // The logged-in user's ID comes from the verified JWT.
@@ -120,9 +168,10 @@ router.post("/", authenticateToken, async (req, res) => {
         latitude,
         longitude,
         address,
+        neighbourhood_id,
         reported_by
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *`,
       [
         title,
@@ -132,6 +181,7 @@ router.post("/", authenticateToken, async (req, res) => {
         latitude || null,
         longitude || null,
         address || null,
+        neighbourhood_id || null,
         reportedBy,
       ]
     );
