@@ -8,6 +8,10 @@ function IssueDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
+
   useEffect(() => {
     const fetchIssue = async () => {
       try {
@@ -25,6 +29,17 @@ function IssueDetails() {
         }
 
         setIssue(data.issue);
+
+        const commentsResponse = await fetch(
+         `http://localhost:5000/api/issues/${id}/comments`
+        );
+
+        const commentsData = await commentsResponse.json();
+
+        if (commentsResponse.ok) {
+          setComments(commentsData.comments || []);
+        }
+
       } catch (error) {
         console.error("Error fetching issue:", error);
         setError(error.message || "Unable to load issue");
@@ -35,6 +50,58 @@ function IssueDetails() {
 
     fetchIssue();
   }, [id]);
+
+  const handleAddComment = async (e) => {
+  e.preventDefault();
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("Please log in to comment on an issue.");
+    return;
+  }
+
+  if (!commentText.trim()) {
+    return;
+  }
+
+  try {
+    setCommentLoading(true);
+
+    const response = await fetch(
+      `http://localhost:5000/api/issues/${id}/comments`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          text: commentText.trim(),
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Unable to add comment.");
+      return;
+    }
+
+    setComments((currentComments) => [
+      ...currentComments,
+      data.comment,
+    ]);
+
+    setCommentText("");
+  } catch (error) {
+    console.error("Comment error:", error);
+    alert("Unable to add comment.");
+  } finally {
+    setCommentLoading(false);
+  }
+};
 
   if (loading) {
     return (
@@ -138,6 +205,48 @@ function IssueDetails() {
 
           </div>
 
+          <div className="issue-details-section comments-section">
+  <h2>Community Discussion</h2>
+
+  {comments.length === 0 ? (
+    <p className="comments-empty">
+      No comments yet. Be the first to share an update.
+    </p>
+  ) : (
+    <div className="comments-list">
+      {comments.map((comment) => (
+        <div className="comment-item" key={comment.id}>
+          <div className="comment-header">
+            <strong>{comment.user_name}</strong>
+            <span>
+              {new Date(comment.created_at).toLocaleDateString()}
+            </span>
+          </div>
+
+          <p>{comment.text}</p>
+        </div>
+      ))}
+    </div>
+  )}
+
+  <form className="comment-form" onSubmit={handleAddComment}>
+    <textarea
+      value={commentText}
+      onChange={(e) => setCommentText(e.target.value)}
+      placeholder="Share an update or comment about this issue..."
+      rows="4"
+      disabled={commentLoading}
+    />
+
+    <button
+      type="submit"
+      className="btn btn-primary"
+      disabled={commentLoading || !commentText.trim()}
+    >
+      {commentLoading ? "Posting..." : "Post Comment"}
+    </button>
+  </form>
+</div>
           <aside className="issue-details-sidebar">
 
             <div className="issue-info-card">

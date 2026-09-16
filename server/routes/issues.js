@@ -84,6 +84,92 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.get("/:id/comments", async (req, res) => {
+  try {
+    const issueId = req.params.id;
+
+    const result = await pool.query(
+      `SELECT
+        comments.id,
+        comments.issue_id,
+        comments.text,
+        comments.created_at,
+        users.name AS user_name
+       FROM comments
+       JOIN users ON comments.user_id = users.id
+       WHERE comments.issue_id = $1
+       ORDER BY comments.created_at ASC`,
+      [issueId]
+    );
+
+    res.json({
+      comments: result.rows,
+    });
+
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch comments",
+    });
+  }
+});
+
+router.post("/:id/comments", authenticateToken, async (req, res) => {
+  try {
+    const issueId = req.params.id;
+    const userId = req.user.id;
+    const { text } = req.body;
+
+    if (!text || !text.trim()) {
+      return res.status(400).json({
+        message: "Comment text is required",
+      });
+    }
+
+    // Check whether the issue exists
+    const issueResult = await pool.query(
+      "SELECT id FROM issues WHERE id = $1",
+      [issueId]
+    );
+
+    if (issueResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Issue not found",
+      });
+    }
+
+    // Add comment
+    const result = await pool.query(
+      `INSERT INTO comments (issue_id, user_id, text)
+       VALUES ($1, $2, $3)
+       RETURNING id, issue_id, text, created_at`,
+      [issueId, userId, text.trim()]
+    );
+
+    // Get user's name
+    const userResult = await pool.query(
+      "SELECT name FROM users WHERE id = $1",
+      [userId]
+    );
+
+    res.status(201).json({
+      message: "Comment added successfully",
+      comment: {
+        ...result.rows[0],
+        user_name: userResult.rows[0].name,
+      },
+    });
+
+  } catch (error) {
+    console.error("Error adding comment:", error);
+
+    res.status(500).json({
+      message: "Failed to add comment",
+    });
+  }
+});
+
 router.post("/:id/support", authenticateToken, async (req, res) => {
   try {
     const issueId = req.params.id;

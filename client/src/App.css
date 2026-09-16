@@ -2867,3 +2867,81 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================
+   Community Discussion
+========================= */
+
+.comments-section {
+  background: #ffffff;
+}
+
+.comments-empty {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.comment-item {
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.comment-header strong {
+  font-size: 14px;
+  color: #111827;
+}
+
+.comment-header span {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.comment-item p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.comment-form textarea {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  resize: vertical;
+  min-height: 100px;
+  outline: none;
+}
+
+.comment-form textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.comment-form .btn {
+  align-self: flex-start;
+}
