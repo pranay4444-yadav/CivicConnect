@@ -6,6 +6,7 @@ const pool = require("./db");
 const issuesRoutes = require("./routes/issues");
 const authRoutes = require("./routes/auth");
 const neighbourhoodsRoutes = require("./routes/neighbourhoods");
+const adminRoutes = require("./routes/admin");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api/issues", issuesRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/neighbourhoods", neighbourhoodsRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/", async (req, res) => {
   try {

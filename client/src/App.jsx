@@ -8,6 +8,7 @@ import ReportIssue from "./pages/ReportIssue";
 import Community from "./pages/Community";
 import IssueDetails from "./pages/IssueDetails";
 import AuthorityDashboard from "./pages/AuthorityDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 
 import "./App.css";
 
@@ -106,7 +107,7 @@ function App() {
           path="*"
           element={<Navigate to="/" replace />}
         />
-
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </BrowserRouter>
   );
