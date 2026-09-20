@@ -4,6 +4,7 @@ const pool = require("../db");
 const authenticateToken = require("../middleware/authMiddleware");
 
 
+
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(
@@ -67,6 +68,48 @@ router.get("/authorities/list", authenticateToken, async (req, res) => {
 
     res.status(500).json({
       message: "Failed to fetch authorities",
+    });
+  }
+});
+
+router.get("/my", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const result = await pool.query(
+      `SELECT
+        issues.*,
+        users.name AS reporter_name,
+
+        (
+          SELECT COUNT(*)
+          FROM issue_support
+          WHERE issue_support.issue_id = issues.id
+        ) AS support_count,
+
+        (
+          SELECT COUNT(*)
+          FROM issue_verifications
+          WHERE issue_verifications.issue_id = issues.id
+        ) AS verification_count
+
+       FROM issues
+       JOIN users
+         ON issues.reported_by = users.id
+       WHERE issues.reported_by = $1
+       ORDER BY issues.created_at DESC`,
+      [userId]
+    );
+
+    res.json({
+      issues: result.rows,
+    });
+
+  } catch (error) {
+    console.error("Error fetching user's issues:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch your issues",
     });
   }
 });

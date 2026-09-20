@@ -9,6 +9,7 @@ import Community from "./pages/Community";
 import IssueDetails from "./pages/IssueDetails";
 import AuthorityDashboard from "./pages/AuthorityDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import MyIssues from "./pages/MyIssues";
 
 import "./App.css";
 
@@ -66,6 +67,15 @@ function App() {
           path="/issues"
           element={<Issues />}
         />
+
+        <Route
+  path="/my-issues"
+  element={
+    <ProtectedRoute allowedRoles={["CITIZEN"]}>
+      <MyIssues />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/issues/:id"
