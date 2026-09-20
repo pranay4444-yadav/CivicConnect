@@ -117,7 +117,14 @@ function App() {
           path="*"
           element={<Navigate to="/" replace />}
         />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route
+  path="/admin"
+  element={
+    <ProtectedRoute allowedRoles={["ADMIN"]}>
+      <AdminDashboard />
+    </ProtectedRoute>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );
