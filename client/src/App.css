@@ -3504,3 +3504,69 @@ body {
   background: #eff6ff;
   color: #2563eb;
 }
+
+/* Admin Neighbourhoods */
+
+.admin-neighbourhoods-section {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.admin-neighbourhoods-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.admin-neighbourhood-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.admin-neighbourhood-card h3 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 17px;
+}
+
+.admin-neighbourhood-description {
+  margin: 0 0 20px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.admin-neighbourhood-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.admin-neighbourhood-details div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-neighbourhood-details span {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.admin-neighbourhood-details strong {
+  font-size: 14px;
+  color: #0f172a;
+}
+
+@media (max-width: 900px) {
+  .admin-neighbourhoods-grid {
+    grid-template-columns: 1fr;
+  }
+}

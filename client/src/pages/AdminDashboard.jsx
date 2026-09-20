@@ -5,6 +5,7 @@ function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [issues, setIssues] = useState([]);
   const [users, setUsers] = useState([]);
+  const [neighbourhoods, setNeighbourhoods] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -149,6 +150,26 @@ function AdminDashboard() {
         }
 
         setUsers(usersData.users);
+
+        const neighbourhoodsResponse = await fetch(
+  "http://localhost:5000/api/admin/neighbourhoods",
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
+
+const neighbourhoodsData = await neighbourhoodsResponse.json();
+
+if (!neighbourhoodsResponse.ok) {
+  throw new Error(
+    neighbourhoodsData.message ||
+      "Failed to load neighbourhoods"
+  );
+}
+
+setNeighbourhoods(neighbourhoodsData.neighbourhoods);
       } catch (error) {
         console.error(
           "Error loading admin dashboard:",
@@ -377,6 +398,56 @@ function AdminDashboard() {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+            {/* Neighbourhoods */}
+
+      <div className="admin-neighbourhoods-section">
+        <div className="admin-section-header">
+          <h2>Neighbourhoods</h2>
+          <p>
+            Monitor neighbourhood communities and their activity.
+          </p>
+        </div>
+
+        <div className="admin-neighbourhoods-grid">
+          {neighbourhoods.map((neighbourhood) => (
+            <div
+              className="admin-neighbourhood-card"
+              key={neighbourhood.id}
+            >
+              <h3>{neighbourhood.name}</h3>
+
+              <p className="admin-neighbourhood-description">
+                {neighbourhood.description ||
+                  "No description provided."}
+              </p>
+
+              <div className="admin-neighbourhood-details">
+                <div>
+                  <span>Created By</span>
+                  <strong>
+                    {neighbourhood.created_by_name ||
+                      "Unknown"}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Members</span>
+                  <strong>
+                    {neighbourhood.member_count}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Issues</span>
+                  <strong>
+                    {neighbourhood.issue_count}
+                  </strong>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

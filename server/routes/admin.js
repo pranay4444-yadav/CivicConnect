@@ -187,4 +187,57 @@ router.patch("/users/:id/role", authenticateToken, async (req, res) => {
 });
 
 
+// =========================================================
+// Get All Neighbourhoods
+// =========================================================
+
+router.get("/neighbourhoods", authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== "ADMIN") {
+      return res.status(403).json({
+        message: "Only admins can access neighbourhoods",
+      });
+    }
+
+    const result = await pool.query(`
+      SELECT
+        n.id,
+        n.name,
+        n.description,
+        n.created_at,
+        u.name AS created_by_name,
+        COUNT(DISTINCT nm.user_id) AS member_count,
+        COUNT(DISTINCT i.id) AS issue_count
+      FROM neighbourhoods n
+      LEFT JOIN users u
+        ON n.created_by = u.id
+      LEFT JOIN neighbourhood_members nm
+        ON n.id = nm.neighbourhood_id
+      LEFT JOIN issues i
+        ON n.id = i.neighbourhood_id
+      GROUP BY
+        n.id,
+        n.name,
+        n.description,
+        n.created_at,
+        u.name
+      ORDER BY n.created_at DESC
+    `);
+
+    res.json({
+      neighbourhoods: result.rows,
+    });
+
+  } catch (error) {
+    console.error(
+      "Error fetching admin neighbourhoods:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Failed to fetch neighbourhoods",
+    });
+  }
+});
+
 module.exports = router;
