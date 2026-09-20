@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -13,6 +13,48 @@ function Navbar() {
       return null;
     }
   });
+
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+  const fetchNotifications = async () => {
+    if (!user) {
+      setNotifications([]);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        "http://localhost:5000/api/notifications",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to fetch notifications"
+        );
+      }
+
+      setNotifications(data.notifications);
+    } catch (error) {
+      console.error(
+        "Error fetching notifications:",
+        error
+      );
+    }
+  };
+
+  fetchNotifications();
+}, [user]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -67,6 +109,106 @@ function Navbar() {
         {/* Actions */}
 
         <div className="nav-actions">
+
+          {user && (
+  <div className="notification-wrapper">
+    <button
+      type="button"
+      className="notification-button"
+      title="Notifications"
+       onClick={() =>
+    setShowNotifications(!showNotifications)
+  }
+    >
+      🔔
+
+      {notifications.filter(
+        (notification) => !notification.is_read
+      ).length > 0 && (
+        <span className="notification-badge">
+          {
+            notifications.filter(
+              (notification) => !notification.is_read
+            ).length
+          }
+        </span>
+      )}
+    </button>
+
+    {showNotifications && (
+  <div className="notification-dropdown">
+    <div className="notification-dropdown-header">
+      <strong>Notifications</strong>
+    </div>
+
+    {notifications.length === 0 ? (
+      <div className="notification-empty">
+        No notifications yet.
+      </div>
+    ) : (
+      <div className="notification-list">
+        {notifications.map((notification) => (
+          <div
+  key={notification.id}
+  className={`notification-item ${
+    notification.is_read ? "" : "unread"
+  }`}
+  onClick={async () => {
+    if (notification.is_read) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:5000/api/notifications/${notification.id}/read`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to mark notification as read"
+        );
+      }
+
+      setNotifications((currentNotifications) =>
+        currentNotifications.map((item) =>
+          item.id === notification.id
+            ? { ...item, is_read: true }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Error marking notification as read:",
+        error
+      );
+    }
+  }}
+>
+            <p>{notification.message}</p>
+
+            <small>
+              {new Date(
+                notification.created_at
+              ).toLocaleString()}
+            </small>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+  </div>
+)}
 
           {!user ? (
             <>

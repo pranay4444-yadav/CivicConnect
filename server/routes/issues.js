@@ -348,7 +348,9 @@ router.patch("/:id/status", authenticateToken, async (req, res) => {
 
     // Check whether the issue exists
     const issueResult = await pool.query(
-      "SELECT id, status FROM issues WHERE id = $1",
+      `SELECT id, status, reported_by, title
+      FROM issues
+      WHERE id = $1`,
       [issueId]
     );
 
@@ -384,6 +386,18 @@ router.patch("/:id/status", authenticateToken, async (req, res) => {
        VALUES ($1, $2, $3, $4)`,
       [issueId, status, userId, comment || null]
     );
+
+    await pool.query(
+  `INSERT INTO notifications
+   (user_id, type, message, issue_id)
+   VALUES ($1, $2, $3, $4)`,
+  [
+    issueResult.rows[0].reported_by,
+    "STATUS_UPDATE",
+    `Your issue "${issueResult.rows[0].title}" has been updated to "${status}".`,
+    issueId,
+  ]
+);
 
     res.json({
       message: "Issue status updated successfully",
