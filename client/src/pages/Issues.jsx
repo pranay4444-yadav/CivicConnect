@@ -66,6 +66,7 @@ function Issues() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [status, setStatus] = useState("All");
+  const [sortBy, setSortBy] = useState("latest");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -137,6 +138,26 @@ function Issues() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  const sortedIssues = [...filteredIssues].sort((a, b) => {
+  if (sortBy === "latest") {
+    return b.id - a.id;
+  }
+
+  if (sortBy === "oldest") {
+    return a.id - b.id;
+  }
+
+  if (sortBy === "supported") {
+    return b.supports - a.supports;
+  }
+
+  if (sortBy === "verified") {
+    return b.verifications - a.verifications;
+  }
+
+  return 0;
+});
+
   return (
     <div>
       <Navbar />
@@ -207,6 +228,16 @@ function Issues() {
               <option value="Rejected">Rejected</option>
               <option value="Duplicate">Duplicate</option>
             </select>
+
+            <select
+  value={sortBy}
+  onChange={(e) => setSortBy(e.target.value)}
+>
+  <option value="latest">Latest</option>
+  <option value="oldest">Oldest</option>
+  <option value="supported">Most Supported</option>
+  <option value="verified">Most Verified</option>
+</select>
           </div>
         </section>
 
@@ -243,7 +274,7 @@ function Issues() {
             </div>
           ) : filteredIssues.length > 0 ? (
             <div className="issues-grid">
-              {filteredIssues.map((issue) => (
+              {sortedIssues.map((issue) => (
                 <IssueCard
                   key={issue.id}
                   issue={issue}
