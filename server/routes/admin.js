@@ -56,4 +56,43 @@ router.get("/stats", authenticateToken, async (req, res) => {
   }
 });
 
+// =========================================================
+// Get All Issues
+// =========================================================
+
+router.get("/issues", authenticateToken, async (req, res) => {
+  try {
+    // Only admins can access this route
+    if (req.user.role !== "ADMIN") {
+      return res.status(403).json({
+        message: "Only admins can access issues",
+      });
+    }
+
+    const result = await pool.query(`
+  SELECT
+    i.id,
+    i.title,
+    i.description,
+    i.category,
+    i.status,
+    i.created_at,
+    u.name AS reporter_name
+  FROM issues i
+  LEFT JOIN users u ON i.reported_by = u.id
+  ORDER BY i.created_at DESC
+`);
+
+    res.json({
+      issues: result.rows,
+    });
+  } catch (error) {
+    console.error("Error fetching admin issues:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch issues",
+    });
+  }
+});
+
 module.exports = router;
