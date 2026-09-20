@@ -257,13 +257,12 @@ function ReportIssue() {
                   name="neighbourhood"
                   value={formData.neighbourhood}
                   onChange={handleChange}
-                  required
                   disabled={loadingNeighbourhoods}
                 >
                 <option value="">
                     {loadingNeighbourhoods
                       ? "Loading neighbourhoods..."
-                      : "Select your neighbourhood"}
+                      : "Select a neighbourhood (optional)"}
                 </option>
 
                 {neighbourhoods.map((neighbourhood) => (

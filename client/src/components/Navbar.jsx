@@ -69,6 +69,10 @@ function Navbar() {
     user?.role === "AUTHORITY" ||
     user?.role === "ADMIN";
 
+
+const isCitizen =
+  user?.role === "CITIZEN";
+
   return (
     <header className="navbar">
       <div className="navbar-container">
@@ -94,6 +98,13 @@ function Navbar() {
           <Link to="/community">
             Community
           </Link>
+
+
+{isCitizen && (
+  <Link to="/my-issues">
+    My Issues
+  </Link>
+)}
 
           <Link to="/about">
             About
