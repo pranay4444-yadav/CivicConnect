@@ -3691,3 +3691,12 @@ body {
     max-height: 70vh;
   }
 }
+
+.my-issue-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  font-size: 14px;
+}
