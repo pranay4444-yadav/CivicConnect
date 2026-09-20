@@ -4,49 +4,89 @@ import { Link } from "react-router-dom";
 function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [issues, setIssues] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const handleStatusChange = async (issueId, newStatus) => {
-  try {
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem("token");
 
-    const response = await fetch(
-      `http://localhost:5000/api/issues/${issueId}/status`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          status: newStatus,
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.message || "Failed to update issue status"
+      const response = await fetch(
+        `http://localhost:5000/api/issues/${issueId}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status: newStatus,
+          }),
+        }
       );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to update issue status"
+        );
+      }
+
+      console.log("Status updated successfully:", data);
+
+      setIssues((currentIssues) =>
+        currentIssues.map((issue) =>
+          issue.id === issueId
+            ? { ...issue, status: newStatus }
+            : issue
+        )
+      );
+    } catch (error) {
+      console.error("Error updating issue status:", error);
     }
+  };
 
-    console.log("Status updated successfully:", data);
+  const handleRoleChange = async (userId, newRole) => {
+    try {
+      const token = localStorage.getItem("token");
 
-    setIssues((currentIssues) =>
-  currentIssues.map((issue) =>
-    issue.id === issueId
-      ? { ...issue, status: newStatus }
-      : issue
-  )
-);
+      const response = await fetch(
+        `http://localhost:5000/api/admin/users/${userId}/role`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            role: newRole,
+          }),
+        }
+      );
 
-  } catch (error) {
-    console.error("Error updating issue status:", error);
-  }
-};
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to update user role"
+        );
+      }
+
+      console.log("Role updated successfully:", data);
+
+      setUsers((currentUsers) =>
+        currentUsers.map((user) =>
+          user.id === userId
+            ? { ...user, role: newRole }
+            : user
+        )
+      );
+    } catch (error) {
+      console.error("Error updating user role:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -73,26 +113,48 @@ function AdminDashboard() {
         setStats(data.stats);
 
         const issuesResponse = await fetch(
-  "http://localhost:5000/api/admin/issues",
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
+          "http://localhost:5000/api/admin/issues",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-const issuesData = await issuesResponse.json();
+        const issuesData = await issuesResponse.json();
 
-if (!issuesResponse.ok) {
-  throw new Error(
-    issuesData.message || "Failed to load issues"
-  );
-}
+        if (!issuesResponse.ok) {
+          throw new Error(
+            issuesData.message || "Failed to load issues"
+          );
+        }
 
-setIssues(issuesData.issues);
+        setIssues(issuesData.issues);
 
+        const usersResponse = await fetch(
+          "http://localhost:5000/api/admin/users",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const usersData = await usersResponse.json();
+
+        if (!usersResponse.ok) {
+          throw new Error(
+            usersData.message || "Failed to load users"
+          );
+        }
+
+        setUsers(usersData.users);
       } catch (error) {
-        console.error("Error loading admin statistics:", error);
+        console.error(
+          "Error loading admin dashboard:",
+          error
+        );
+
         setError(error.message);
       } finally {
         setLoading(false);
@@ -114,7 +176,9 @@ setIssues(issuesData.issues);
     <div className="admin-dashboard">
       <div className="admin-dashboard-header">
         <h1>Admin Dashboard</h1>
-        <p>Manage CivicConnect and monitor civic activity.</p>
+        <p>
+          Manage CivicConnect and monitor civic activity.
+        </p>
       </div>
 
       {stats && (
@@ -140,75 +204,181 @@ setIssues(issuesData.issues);
           </div>
         </div>
       )}
+
+      {/* Reported Issues */}
+
       <div className="admin-issues-section">
-  <div className="admin-section-header">
-    <h2>Reported Issues</h2>
-    <p>Review and manage civic issues reported by citizens.</p>
-  </div>
+        <div className="admin-section-header">
+          <h2>Reported Issues</h2>
+          <p>
+            Review and manage civic issues reported by
+            citizens.
+          </p>
+        </div>
 
-  <div className="admin-issues-table-wrapper">
-    <table className="admin-issues-table">
-      <thead>
-        <tr>
-          <th>Issue</th>
-          <th>Category</th>
-          <th>Status</th>
-          <th>Reported By</th>
-          <th>Date</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+        <div className="admin-issues-table-wrapper">
+          <table className="admin-issues-table">
+            <thead>
+              <tr>
+                <th>Issue</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Reported By</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
 
-      <tbody>
-        {issues.map((issue) => (
-          <tr key={issue.id}>
-            <td>
-              <strong>{issue.title}</strong>
-              <span>{issue.description}</span>
-            </td>
+            <tbody>
+              {issues.map((issue) => (
+                <tr key={issue.id}>
+                  <td>
+                    <strong>{issue.title}</strong>
+                    <span>{issue.description}</span>
+                  </td>
 
-            <td>{issue.category}</td>
+                  <td>{issue.category}</td>
 
-            <td>
-  <select
-    className="admin-status-select"
-    value={issue.status}
-    onChange={(event) => {
-  handleStatusChange(issue.id, event.target.value);
-}}
-  >
-    <option value="REPORTED">REPORTED</option>
-    <option value="UNDER REVIEW">UNDER REVIEW</option>
-    <option value="VERIFIED">VERIFIED</option>
-    <option value="ASSIGNED">ASSIGNED</option>
-    <option value="IN PROGRESS">IN PROGRESS</option>
-    <option value="RESOLVED">RESOLVED</option>
-    <option value="CLOSED">CLOSED</option>
-    <option value="REJECTED">REJECTED</option>
-    <option value="DUPLICATE">DUPLICATE</option>
-  </select>
-</td>
+                  <td>
+                    <select
+                      className="admin-status-select"
+                      value={issue.status}
+                      onChange={(event) => {
+                        handleStatusChange(
+                          issue.id,
+                          event.target.value
+                        );
+                      }}
+                    >
+                      <option value="REPORTED">
+                        REPORTED
+                      </option>
 
-            <td>{issue.reporter_name || "Unknown"}</td>
+                      <option value="UNDER REVIEW">
+                        UNDER REVIEW
+                      </option>
 
-            <td>
-  {new Date(issue.created_at).toLocaleDateString()}
-</td>
+                      <option value="VERIFIED">
+                        VERIFIED
+                      </option>
 
-<td>
-  <Link
-    to={`/issues/${issue.id}`}
-    className="admin-view-button"
-  >
-    View
-  </Link>
-</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
+                      <option value="ASSIGNED">
+                        ASSIGNED
+                      </option>
+
+                      <option value="IN PROGRESS">
+                        IN PROGRESS
+                      </option>
+
+                      <option value="RESOLVED">
+                        RESOLVED
+                      </option>
+
+                      <option value="CLOSED">
+                        CLOSED
+                      </option>
+
+                      <option value="REJECTED">
+                        REJECTED
+                      </option>
+
+                      <option value="DUPLICATE">
+                        DUPLICATE
+                      </option>
+                    </select>
+                  </td>
+
+                  <td>
+                    {issue.reporter_name || "Unknown"}
+                  </td>
+
+                  <td>
+                    {new Date(
+                      issue.created_at
+                    ).toLocaleDateString()}
+                  </td>
+
+                  <td>
+                    <Link
+                      to={`/issues/${issue.id}`}
+                      className="admin-view-button"
+                    >
+                      View
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Registered Users */}
+
+      <div className="admin-users-section">
+        <div className="admin-section-header">
+          <h2>Registered Users</h2>
+          <p>
+            View users and their roles on CivicConnect.
+          </p>
+        </div>
+
+        <div className="admin-users-table-wrapper">
+          <table className="admin-users-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id}>
+                  <td>
+                    <strong>{user.name}</strong>
+                  </td>
+
+                  <td>{user.email}</td>
+
+                  <td>
+                    <select
+                      className={`admin-user-role-select ${user.role.toLowerCase()}`}
+                      value={user.role}
+                      onChange={(event) => {
+                        handleRoleChange(
+                          user.id,
+                          event.target.value
+                        );
+                      }}
+                    >
+                      <option value="CITIZEN">
+                        CITIZEN
+                      </option>
+
+                      <option value="AUTHORITY">
+                        AUTHORITY
+                      </option>
+
+                      <option value="ADMIN">
+                        ADMIN
+                      </option>
+                    </select>
+                  </td>
+
+                  <td>
+                    {new Date(
+                      user.created_at
+                    ).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

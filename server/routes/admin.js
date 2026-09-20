@@ -95,4 +95,96 @@ router.get("/issues", authenticateToken, async (req, res) => {
   }
 });
 
+// =========================================================
+// Get All Users
+// =========================================================
+
+router.get("/users", authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== "ADMIN") {
+      return res.status(403).json({
+        message: "Only admins can access users",
+      });
+    }
+
+    const result = await pool.query(`
+      SELECT
+        id,
+        name,
+        email,
+        role,
+        created_at
+      FROM users
+      ORDER BY created_at DESC
+    `);
+
+    res.json({
+      users: result.rows,
+    });
+
+  } catch (error) {
+    console.error("Error fetching admin users:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch users",
+    });
+  }
+});
+
+// =========================================================
+// Update User Role
+// =========================================================
+
+router.patch("/users/:id/role", authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== "ADMIN") {
+      return res.status(403).json({
+        message: "Only admins can update user roles",
+      });
+    }
+
+    const userId = req.params.id;
+    const { role } = req.body;
+
+    const allowedRoles = [
+      "CITIZEN",
+      "AUTHORITY",
+      "ADMIN",
+    ];
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({
+        message: "Invalid user role",
+      });
+    }
+
+    const result = await pool.query(
+      `UPDATE users
+       SET role = $1
+       WHERE id = $2
+       RETURNING id, name, email, role`,
+      [role, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      message: "User role updated successfully",
+      user: result.rows[0],
+    });
+
+  } catch (error) {
+    console.error("Error updating user role:", error);
+
+    res.status(500).json({
+      message: "Failed to update user role",
+    });
+  }
+});
+
+
 module.exports = router;
