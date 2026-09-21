@@ -81,6 +81,23 @@ function ReportIssue() {
       return;
     }
 
+    const formDataToSend = new FormData();
+
+formDataToSend.append("title", formData.title);
+formDataToSend.append("description", formData.description);
+formDataToSend.append("category", formData.category);
+formDataToSend.append("latitude", formData.latitude);
+formDataToSend.append("longitude", formData.longitude);
+formDataToSend.append("address", formData.location);
+
+if (formData.neighbourhood) {
+  formDataToSend.append("neighbourhood_id", formData.neighbourhood);
+}
+
+if (image) {
+  formDataToSend.append("image", image);
+}
+
     setLoading(true);
 
     try {
@@ -89,18 +106,9 @@ function ReportIssue() {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            title: formData.title,
-            description: formData.description,
-            category: formData.category,
-            latitude: formData.latitude,
-            longitude: formData.longitude,
-            address: formData.location,
-            neighbourhood_id: formData.neighbourhood,
-         }),
+  Authorization: `Bearer ${token}`,
+},
+body: formDataToSend,
         }
       );
 

@@ -1,7 +1,15 @@
+
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 const authenticateToken = require("../middleware/authMiddleware");
+
+const multer = require("multer");
+const cloudinary = require("../config/cloudinary");
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+});
 
 
 
@@ -579,21 +587,45 @@ router.post("/:id/verify", authenticateToken, async (req, res) => {
 });
 
 
-router.post("/", authenticateToken, async (req, res) => {
+router.post("/", authenticateToken,  upload.single("image"),
+  async (req, res) => {
   try {
     const {
       title,
       description,
       category,
-      image_url,
       latitude,
       longitude,
       address,
       neighbourhood_id,
     } = req.body;
 
+
+let imageUrl = null;
+
     // The logged-in user's ID comes from the verified JWT.
     const reportedBy = req.user.id;
+
+    if (req.file) {
+  const result = await new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "civicconnect/issues",
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      }
+    );
+
+    uploadStream.end(req.file.buffer);
+  });
+
+  imageUrl = result.secure_url;
+}
 
     if (!title || !description || !category) {
       return res.status(400).json({
@@ -620,7 +652,7 @@ router.post("/", authenticateToken, async (req, res) => {
         title,
         description,
         category,
-        image_url || null,
+        imageUrl || null,
         latitude || null,
         longitude || null,
         address || null,
