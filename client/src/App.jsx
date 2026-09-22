@@ -69,15 +69,6 @@ function App() {
         />
 
         <Route
-  path="/my-issues"
-  element={
-    <ProtectedRoute allowedRoles={["CITIZEN"]}>
-      <MyIssues />
-    </ProtectedRoute>
-  }
-/>
-
-        <Route
           path="/issues/:id"
           element={<IssueDetails />}
         />
@@ -87,7 +78,16 @@ function App() {
           element={<Community />}
         />
 
-        {/* Protected Citizen Route */}
+        {/* Citizen Routes */}
+
+        <Route
+          path="/my-issues"
+          element={
+            <ProtectedRoute allowedRoles={["CITIZEN"]}>
+              <MyIssues />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/report"
@@ -98,15 +98,24 @@ function App() {
           }
         />
 
-        {/* Protected Authority/Admin Route */}
+        {/* Authority Route */}
 
         <Route
           path="/authority"
           element={
-            <ProtectedRoute
-              allowedRoles={["AUTHORITY", "ADMIN"]}
-            >
+            <ProtectedRoute allowedRoles={["AUTHORITY"]}>
               <AuthorityDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Route */}
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />
@@ -117,14 +126,7 @@ function App() {
           path="*"
           element={<Navigate to="/" replace />}
         />
-        <Route
-  path="/admin"
-  element={
-    <ProtectedRoute allowedRoles={["ADMIN"]}>
-      <AdminDashboard />
-    </ProtectedRoute>
-  }
-/>
+
       </Routes>
     </BrowserRouter>
   );

@@ -66,8 +66,10 @@ function Navbar() {
   };
 
   const isAuthority =
-    user?.role === "AUTHORITY" ||
-    user?.role === "ADMIN";
+    user?.role === "AUTHORITY";
+
+  const isAdmin =
+    user?.role === "ADMIN";  
 
 
 const isCitizen =
@@ -115,7 +117,14 @@ const isCitizen =
               Authority Dashboard
             </Link>
           )}
+
+          {isAdmin && (
+  <Link to="/admin">
+    Admin Dashboard
+  </Link>
+)}
         </nav>
+
 
         {/* Actions */}
 
@@ -243,12 +252,14 @@ const isCitizen =
                 Hi, {user.name}
               </span>
 
-              <Link
-                to="/report"
-                className="btn btn-primary"
-              >
-                Report an Issue
-              </Link>
+              {isCitizen && (
+      <Link
+        to="/report"
+        className="btn btn-primary"
+      >
+        Report an Issue
+      </Link>
+    )}
 
               <button
                 type="button"

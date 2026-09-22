@@ -656,11 +656,19 @@ function IssueDetails() {
                 <h1>{issue.title}</h1>
 
                 <p className="issue-reporter">
-                  Reported by{" "}
-                  <strong>
-                    {issue.reporter_name}
-                  </strong>
-                </p>
+  Reported by{" "}
+  <strong>
+    {issue.reporter_name}
+  </strong>
+</p>
+
+<div className="issue-header-meta">
+  <span>Issue #{issue.id}</span>
+  <span>•</span>
+  <span>
+    Reported {formatDate(issue.created_at)}
+  </span>
+</div>
               </div>
 
               <span
@@ -678,13 +686,21 @@ function IssueDetails() {
             ================================================= */}
 
             {issue.image_url ? (
-              <div className="issue-details-image">
-                <img
-                  src={issue.image_url}
-                  alt={`Evidence for ${issue.title}`}
-                />
-              </div>
-            ) : (
+  <section className="issue-details-section issue-evidence-section">
+    <h2>Issue Evidence</h2>
+
+    <p className="section-subtitle">
+      Photo submitted with this report.
+    </p>
+
+    <div className="issue-details-image">
+      <img
+        src={issue.image_url}
+        alt={`Evidence for ${issue.title}`}
+      />
+    </div>
+  </section>
+) : (
               <div className="issue-details-no-image">
                 <span>📷</span>
                 <p>
