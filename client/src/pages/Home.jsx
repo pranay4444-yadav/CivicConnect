@@ -1,4 +1,13 @@
 import { Link } from "react-router-dom";
+import {
+  MapContainer,
+  TileLayer,
+  CircleMarker,
+  Popup,
+} from "react-leaflet";
+
+import "leaflet/dist/leaflet.css";
+
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -16,6 +25,8 @@ function Home() {
         <section className="hero-section">
           <div className="container hero-container">
 
+            {/* Hero Content */}
+
             <div className="hero-content">
 
               <span className="hero-badge">
@@ -25,7 +36,9 @@ function Home() {
               <h1>
                 Report local issues.
                 <br />
-                <span>Make your community better.</span>
+                <span>
+                  Make your community better.
+                </span>
               </h1>
 
               <p>
@@ -71,7 +84,7 @@ function Home() {
             </div>
 
             {/* =================================================
-                Hero Visual
+                Hero Map
             ================================================= */}
 
             <div
@@ -81,6 +94,8 @@ function Home() {
 
               <div className="hero-map-card">
 
+                {/* Map Header */}
+
                 <div className="map-top">
 
                   <div>
@@ -89,52 +104,120 @@ function Home() {
                     </strong>
 
                     <span>
-                      Nearby civic problems
+                      Explore civic problems reported nearby
                     </span>
                   </div>
 
                   <span className="map-status">
-                    LIVE
+                    ● LIVE
                   </span>
 
                 </div>
 
-                <div className="fake-map">
+                {/* Real OpenStreetMap */}
 
-                  <div className="map-road road-1"></div>
-                  <div className="map-road road-2"></div>
-                  <div className="map-road road-3"></div>
+                <div className="hero-real-map">
 
-                  <div
-                    className="map-marker marker-1"
-                    aria-label="Issue location"
+                  <MapContainer
+                    center={[12.9716, 77.5946]}
+                    zoom={12}
+                    scrollWheelZoom={false}
+                    dragging={false}
+                    zoomControl={false}
+                    doubleClickZoom={false}
+                    touchZoom={false}
+                    keyboard={false}
+                    className="hero-leaflet-map"
                   >
-                    📍
-                  </div>
 
-                  <div
-                    className="map-marker marker-2"
-                    aria-label="Issue location"
-                  >
-                    📍
-                  </div>
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
 
-                  <div
-                    className="map-marker marker-3"
-                    aria-label="Issue location"
-                  >
-                    📍
-                  </div>
+                    {/* Sample Issue Marker 1 */}
 
-                  <div className="map-location">
+                    <CircleMarker
+                      center={[
+                        12.9716,
+                        77.5946,
+                      ]}
+                      radius={9}
+                    >
+                      <Popup>
+                        <strong>
+                          Civic issue
+                        </strong>
 
-                    <strong>
-                      12 active issues
-                    </strong>
+                        <br />
 
-                    <span>
-                      in your community
-                    </span>
+                        Issue reported by the community.
+                      </Popup>
+                    </CircleMarker>
+
+                    {/* Sample Issue Marker 2 */}
+
+                    <CircleMarker
+                      center={[
+                        13.0055,
+                        77.5692,
+                      ]}
+                      radius={9}
+                    >
+                      <Popup>
+                        <strong>
+                          Road issue
+                        </strong>
+
+                        <br />
+
+                        Road problem reported nearby.
+                      </Popup>
+                    </CircleMarker>
+
+                    {/* Sample Issue Marker 3 */}
+
+                    <CircleMarker
+                      center={[
+                        13.0358,
+                        77.597,
+                      ]}
+                      radius={9}
+                    >
+                      <Popup>
+                        <strong>
+                          Community issue
+                        </strong>
+
+                        <br />
+
+                        Civic problem reported by residents.
+                      </Popup>
+                    </CircleMarker>
+
+                  </MapContainer>
+
+                  {/* Map Information */}
+
+                  <div className="hero-map-summary">
+
+                    <div>
+                      <strong>
+                        Explore reported issues
+                      </strong>
+
+                      <span>
+                        See civic problems reported by
+                        the community
+                      </span>
+                    </div>
+
+                    <Link
+                      to="/issues"
+                      className="hero-map-link"
+                    >
+                      View Issues →
+                    </Link>
 
                   </div>
 
@@ -148,34 +231,62 @@ function Home() {
         </section>
 
         {/* =================================================
-            Platform Stats
+            Platform Highlights
         ================================================= */}
 
         <section
           className="stats-section"
-          aria-label="CivicConnect statistics"
+          aria-label="CivicConnect platform features"
         >
 
           <div className="container stats-grid">
 
             <div className="stat-card">
-              <strong>1,250+</strong>
-              <span>Issues Reported</span>
+
+              <strong>
+                📍
+              </strong>
+
+              <span>
+                Location-Based Reporting
+              </span>
+
             </div>
 
             <div className="stat-card">
-              <strong>840+</strong>
-              <span>Issues Resolved</span>
+
+              <strong>
+                🛡️
+              </strong>
+
+              <span>
+                Community Verification
+              </span>
+
             </div>
 
             <div className="stat-card">
-              <strong>35+</strong>
-              <span>Neighbourhoods</span>
+
+              <strong>
+                🏘️
+              </strong>
+
+              <span>
+                Neighbourhood Communities
+              </span>
+
             </div>
 
             <div className="stat-card">
-              <strong>4,500+</strong>
-              <span>Citizens Connected</span>
+
+              <strong>
+                🔔
+              </strong>
+
+              <span>
+                Status Notifications
+              </span>
+
             </div>
 
           </div>
@@ -350,7 +461,7 @@ function Home() {
                   </strong>
 
                   <span>
-                    1,248 members
+                    Connect with residents nearby
                   </span>
 
                 </div>
@@ -367,11 +478,11 @@ function Home() {
                 <div>
 
                   <strong>
-                    Large pothole near main road
+                    Report local problems
                   </strong>
 
                   <span>
-                    23 residents support this issue
+                    Share issues affecting your area
                   </span>
 
                 </div>
@@ -388,11 +499,11 @@ function Home() {
                 <div>
 
                   <strong>
-                    Streetlight not working
+                    Verify community reports
                   </strong>
 
                   <span>
-                    16 residents support this issue
+                    Help confirm genuine civic issues
                   </span>
 
                 </div>
@@ -402,7 +513,7 @@ function Home() {
               <div className="community-footer">
 
                 <span>
-                  ✓ Community verified
+                  ✓ Community powered
                 </span>
 
               </div>

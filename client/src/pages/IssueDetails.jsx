@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
+import {
+  MapContainer,
+  TileLayer,
+  CircleMarker,
+  Popup,
+} from "react-leaflet";
+
+import "leaflet/dist/leaflet.css";
+
 const API_BASE_URL = "http://localhost:5000/api";
 
 const ISSUE_STATUSES = [
@@ -724,34 +733,61 @@ function IssueDetails() {
             </section>
 
             {/* =================================================
-                Location
-            ================================================= */}
+    Location
+================================================= */}
 
-            <section className="issue-details-section">
-              <h2>Location</h2>
+<section className="issue-details-section">
+  <h2>Location</h2>
 
-              <p>
-                📍{" "}
-                {issue.address ||
-                  "Location not provided"}
-              </p>
+  <p>
+    📍 {issue.address || "Location not provided"}
+  </p>
 
-              {issue.neighbourhood_name && (
-                <p className="issue-neighbourhood">
-                  🏘️{" "}
-                  {issue.neighbourhood_name}
-                </p>
-              )}
+  {issue.neighbourhood_name && (
+    <p className="issue-neighbourhood">
+      🏘️ {issue.neighbourhood_name}
+    </p>
+  )}
 
-              {issue.latitude &&
-                issue.longitude && (
-                  <p className="issue-coordinates">
-                    Coordinates:{" "}
-                    {issue.latitude},{" "}
-                    {issue.longitude}
-                  </p>
-                )}
-            </section>
+  {issue.latitude && issue.longitude && (
+    <>
+      <div className="issue-location-map">
+        <MapContainer
+          center={[
+            Number(issue.latitude),
+            Number(issue.longitude),
+          ]}
+          zoom={16}
+          scrollWheelZoom={false}
+          className="location-map"
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+
+          <CircleMarker
+            center={[
+              Number(issue.latitude),
+              Number(issue.longitude),
+            ]}
+            radius={10}
+          >
+            <Popup>
+              <strong>{issue.title}</strong>
+              <br />
+              {issue.address || "Reported issue location"}
+            </Popup>
+          </CircleMarker>
+        </MapContainer>
+      </div>
+
+      <p className="issue-coordinates">
+        Coordinates: {issue.latitude}, {issue.longitude}
+      </p>
+    </>
+  )}
+</section>
 
             {/* =================================================
                 Status History

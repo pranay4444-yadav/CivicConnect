@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 function Community() {
   const [neighbourhoods, setNeighbourhoods] = useState([]);
@@ -88,10 +90,11 @@ function Community() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      setMessages({
+      setMessages((previous) => ({
+        ...previous,
         [neighbourhoodId]:
           "Please log in to join a neighbourhood.",
-      });
+      }));
       return;
     }
 
@@ -238,330 +241,454 @@ function Community() {
   };
 
   return (
-    <main className="community-page">
+    <>
+      <Navbar />
 
-      {/* HEADER */}
-      <section className="community-header">
-        <div>
-          <span className="section-eyebrow">
-            Community
-          </span>
+      <main className="community-page">
 
-          <h1>Neighbourhoods</h1>
+        {/* =========================================
+            Page Header
+        ========================================== */}
 
-          <p>
-            Connect with people in your area, discuss local
-            issues, and work together to improve your
-            community.
-          </p>
-        </div>
-      </section>
+        <section className="community-header">
+          <div className="community-header-inner">
 
-      {/* BODY */}
-      <section className="community-page-content">
-
-        {/* COMMUNITY OVERVIEW */}
-        <div className="community-overview">
-
-          <div className="community-overview-text">
             <span className="section-eyebrow">
-              CivicConnect Communities
+              Community
             </span>
 
-            <h2>Find your neighbourhood</h2>
+            <h1>Neighbourhood Communities</h1>
 
             <p>
-              Join a local community, support civic issues,
-              and work together with people living nearby.
+              Connect with people in your area, discuss local
+              civic issues and work together to improve your
+              neighbourhood.
             </p>
+
           </div>
+        </section>
 
-          <div className="community-overview-action">
-            <div className="community-count">
-              <strong>{neighbourhoods.length}</strong>
-              <span>
-                {neighbourhoods.length === 1
-                  ? "Community"
-                  : "Communities"}
-              </span>
-            </div>
+        <section className="community-page-content">
 
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() =>
-                setShowCreateForm(!showCreateForm)
-              }
-            >
-              {showCreateForm
-                ? "Cancel"
-                : "+ Create Neighbourhood"}
-            </button>
-          </div>
+          {/* =========================================
+              Community Overview
+          ========================================== */}
 
-        </div>
+          <div className="community-overview">
 
-        {/* MESSAGE */}
-        {messages.page && (
-          <div className="community-message">
-            {messages.page}
-          </div>
-        )}
+            <div className="community-overview-text">
 
-        {/* CREATE FORM */}
-        {showCreateForm && (
-          <form
-            className="community-create-form"
-            onSubmit={handleCreateNeighbourhood}
-          >
-            <div className="community-create-form-header">
               <span className="section-eyebrow">
-                New Community
+                CIVICCONNECT COMMUNITIES
               </span>
 
-              <h3>Create a Neighbourhood</h3>
+              <h2>Find your neighbourhood</h2>
 
               <p>
-                Start a local community and become its
-                neighbourhood head.
+                Join a local community, support genuine civic
+                reports and connect with residents living
+                nearby.
               </p>
-            </div>
-
-            <div className="community-form-grid">
-
-              <div className="form-group">
-                <label htmlFor="neighbourhood-name">
-                  Neighbourhood Name
-                </label>
-
-                <input
-                  id="neighbourhood-name"
-                  type="text"
-                  value={createForm.name}
-                  onChange={(event) =>
-                    setCreateForm({
-                      ...createForm,
-                      name: event.target.value,
-                    })
-                  }
-                  placeholder="e.g. Green Park Residents"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="neighbourhood-description">
-                  Description
-                </label>
-
-                <input
-                  id="neighbourhood-description"
-                  type="text"
-                  value={createForm.description}
-                  onChange={(event) =>
-                    setCreateForm({
-                      ...createForm,
-                      description: event.target.value,
-                    })
-                  }
-                  placeholder="Describe your neighbourhood"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="neighbourhood-latitude">
-                  Latitude
-                </label>
-
-                <input
-                  id="neighbourhood-latitude"
-                  type="number"
-                  step="any"
-                  value={createForm.latitude}
-                  onChange={(event) =>
-                    setCreateForm({
-                      ...createForm,
-                      latitude: event.target.value,
-                    })
-                  }
-                  placeholder="12.9716"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="neighbourhood-longitude">
-                  Longitude
-                </label>
-
-                <input
-                  id="neighbourhood-longitude"
-                  type="number"
-                  step="any"
-                  value={createForm.longitude}
-                  onChange={(event) =>
-                    setCreateForm({
-                      ...createForm,
-                      longitude: event.target.value,
-                    })
-                  }
-                  placeholder="77.5946"
-                />
-              </div>
 
             </div>
 
-            <div className="community-create-actions">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={creating}
-              >
-                {creating
-                  ? "Creating..."
-                  : "Create Neighbourhood"}
-              </button>
-            </div>
-          </form>
-        )}
+            <div className="community-overview-action">
 
-        {/* COMMUNITY LIST */}
-        <div className="community-list-header">
-          <div>
-            <h2>Explore Communities</h2>
+              <div className="community-count">
 
-            <p>
-              Find and join a neighbourhood near you.
-            </p>
-          </div>
-        </div>
+                <strong>
+                  {neighbourhoods.length}
+                </strong>
 
-        {loading && (
-          <div className="community-empty">
-            <h3>Loading communities...</h3>
-          </div>
-        )}
+                <span>
+                  {neighbourhoods.length === 1
+                    ? "Community"
+                    : "Communities"}
+                </span>
 
-        {!loading &&
-          !messages.page &&
-          neighbourhoods.length === 0 && (
-            <div className="community-empty">
-              <div className="community-empty-icon">
-                🏘️
               </div>
-
-              <h3>No communities yet</h3>
-
-              <p>
-                Be the first to create a neighbourhood
-                community in your area.
-              </p>
 
               <button
                 type="button"
                 className="btn btn-primary"
                 onClick={() =>
-                  setShowCreateForm(true)
+                  setShowCreateForm(
+                    (previous) => !previous
+                  )
                 }
               >
-                Create First Community
+                {showCreateForm
+                  ? "Cancel"
+                  : "+ Create Neighbourhood"}
               </button>
+
+            </div>
+
+          </div>
+
+          {/* =========================================
+              Page Message
+          ========================================== */}
+
+          {messages.page && (
+            <div className="community-message">
+              {messages.page}
             </div>
           )}
 
-        {!loading &&
-          neighbourhoods.length > 0 && (
-            <div className="community-grid">
-              {neighbourhoods.map((neighbourhood) => (
-                <article
-                  className="community-card"
-                  key={neighbourhood.id}
+          {/* =========================================
+              Create Neighbourhood
+          ========================================== */}
+
+          {showCreateForm && (
+            <form
+              className="community-create-form"
+              onSubmit={handleCreateNeighbourhood}
+            >
+
+              <div className="community-create-form-header">
+
+                <span className="section-eyebrow">
+                  NEW COMMUNITY
+                </span>
+
+                <h3>Create a Neighbourhood</h3>
+
+                <p>
+                  Start a local CivicConnect community and
+                  become its neighbourhood head.
+                </p>
+
+              </div>
+
+              <div className="community-form-grid">
+
+                <div className="form-group">
+
+                  <label htmlFor="neighbourhood-name">
+                    Neighbourhood Name
+                  </label>
+
+                  <input
+                    id="neighbourhood-name"
+                    type="text"
+                    value={createForm.name}
+                    onChange={(event) =>
+                      setCreateForm({
+                        ...createForm,
+                        name: event.target.value,
+                      })
+                    }
+                    placeholder="e.g. Green Park Residents"
+                    required
+                  />
+
+                </div>
+
+                <div className="form-group">
+
+                  <label htmlFor="neighbourhood-description">
+                    Description
+                  </label>
+
+                  <input
+                    id="neighbourhood-description"
+                    type="text"
+                    value={createForm.description}
+                    onChange={(event) =>
+                      setCreateForm({
+                        ...createForm,
+                        description: event.target.value,
+                      })
+                    }
+                    placeholder="Describe your neighbourhood"
+                  />
+
+                </div>
+
+                <div className="form-group">
+
+                  <label htmlFor="neighbourhood-latitude">
+                    Latitude
+                  </label>
+
+                  <input
+                    id="neighbourhood-latitude"
+                    type="number"
+                    step="any"
+                    value={createForm.latitude}
+                    onChange={(event) =>
+                      setCreateForm({
+                        ...createForm,
+                        latitude: event.target.value,
+                      })
+                    }
+                    placeholder="12.9716"
+                  />
+
+                </div>
+
+                <div className="form-group">
+
+                  <label htmlFor="neighbourhood-longitude">
+                    Longitude
+                  </label>
+
+                  <input
+                    id="neighbourhood-longitude"
+                    type="number"
+                    step="any"
+                    value={createForm.longitude}
+                    onChange={(event) =>
+                      setCreateForm({
+                        ...createForm,
+                        longitude: event.target.value,
+                      })
+                    }
+                    placeholder="77.5946"
+                  />
+
+                </div>
+
+              </div>
+
+              <div className="community-create-actions">
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={creating}
                 >
-                  <div className="community-card-top">
-                    <div className="community-card-icon">
-                      🏘️
-                    </div>
+                  {creating
+                    ? "Creating..."
+                    : "Create Neighbourhood"}
+                </button>
 
-                    {neighbourhood.joined && (
-                      <span className="community-joined">
-                        ✓ Joined
-                      </span>
-                    )}
-                  </div>
+              </div>
 
-                  <div className="community-card-content">
+            </form>
+          )}
 
-                    <h3>{neighbourhood.name}</h3>
+          {/* =========================================
+              Explore Header
+          ========================================== */}
 
-                    <p>
-                      {neighbourhood.description ||
-                        "A CivicConnect neighbourhood community."}
-                    </p>
+          <div className="community-list-header">
 
-                    <div className="community-card-details">
+            <div>
 
-                      <div>
-                        <span>📍</span>
+              <span className="section-eyebrow">
+                EXPLORE
+              </span>
 
-                        <span>
-                          {neighbourhood.latitude &&
-                          neighbourhood.longitude
-                            ? `${Number(
-                                neighbourhood.latitude
-                              ).toFixed(4)}, ${Number(
-                                neighbourhood.longitude
-                              ).toFixed(4)}`
-                            : "Location not specified"}
-                        </span>
-                      </div>
+              <h2>Explore Communities</h2>
 
-                      <div>
-                        <span>👥</span>
+              <p>
+                Find a neighbourhood community and connect
+                with residents in your area.
+              </p>
 
-                        <span>
-                          CivicConnect Community
-                        </span>
-                      </div>
+            </div>
 
-                    </div>
+          </div>
 
-                    <button
-                      type="button"
-                      className={
-                        neighbourhood.joined
-                          ? "btn community-joined-button"
-                          : "btn btn-primary"
-                      }
-                      onClick={() =>
-                        handleJoin(neighbourhood.id)
-                      }
-                      disabled={
-                        joiningId === neighbourhood.id ||
-                        neighbourhood.joined
-                      }
-                    >
-                      {joiningId === neighbourhood.id
-                        ? "Joining..."
-                        : neighbourhood.joined
-                        ? "Already Joined"
-                        : "Join Neighbourhood"}
-                    </button>
+          {/* =========================================
+              Loading
+          ========================================== */}
 
-                    {messages[neighbourhood.id] && (
-                      <div className="community-card-message">
-                        {messages[neighbourhood.id]}
-                      </div>
-                    )}
+          {loading && (
+            <div className="community-empty">
 
-                  </div>
-                </article>
-              ))}
+              <div className="community-empty-icon">
+                ⏳
+              </div>
+
+              <h3>Loading communities...</h3>
+
+              <p>
+                Finding CivicConnect communities.
+              </p>
+
             </div>
           )}
 
-      </section>
-    </main>
+          {/* =========================================
+              Empty
+          ========================================== */}
+
+          {!loading &&
+            neighbourhoods.length === 0 && (
+              <div className="community-empty">
+
+                <div className="community-empty-icon">
+                  🏘️
+                </div>
+
+                <h3>No communities yet</h3>
+
+                <p>
+                  Be the first to create a neighbourhood
+                  community in your area.
+                </p>
+
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() =>
+                    setShowCreateForm(true)
+                  }
+                >
+                  Create First Community
+                </button>
+
+              </div>
+            )}
+
+          {/* =========================================
+              Community Cards
+          ========================================== */}
+
+          {!loading &&
+            neighbourhoods.length > 0 && (
+              <div className="community-page-grid">
+
+                {neighbourhoods.map(
+                  (neighbourhood) => (
+                    <article
+                      className="community-page-card"
+                      key={neighbourhood.id}
+                    >
+
+                      {/* Card Header */}
+
+                      <div className="community-page-card-top">
+
+                        <div className="community-card-icon">
+                          🏘️
+                        </div>
+
+                        {neighbourhood.joined && (
+                          <span className="community-joined">
+                            ✓ Joined
+                          </span>
+                        )}
+
+                      </div>
+
+                      {/* Card Body */}
+
+                      <div className="community-page-card-content">
+
+                        <h3>
+                          {neighbourhood.name}
+                        </h3>
+
+                        <p className="community-page-description">
+                          {neighbourhood.description ||
+                            "A CivicConnect neighbourhood community working together to improve the local area."}
+                        </p>
+
+                        {/* Community Features */}
+
+                        <div className="community-page-features">
+
+                          <div>
+                            <span>🤝</span>
+
+                            <span>
+                              Support local issues
+                            </span>
+                          </div>
+
+                          <div>
+                            <span>✓</span>
+
+                            <span>
+                              Verify civic reports
+                            </span>
+                          </div>
+
+                          <div>
+                            <span>💬</span>
+
+                            <span>
+                              Discuss community problems
+                            </span>
+                          </div>
+
+                        </div>
+
+                        {/* Location */}
+
+                        <div className="community-page-location">
+
+                          <span>📍</span>
+
+                          <span>
+                            {neighbourhood.latitude &&
+                            neighbourhood.longitude
+                              ? "Location registered"
+                              : "Location not specified"}
+                          </span>
+
+                        </div>
+
+                        {/* Join Button */}
+
+                        <button
+                          type="button"
+                          className={
+                            neighbourhood.joined
+                              ? "btn community-joined-button"
+                              : "btn btn-primary"
+                          }
+                          onClick={() =>
+                            handleJoin(
+                              neighbourhood.id
+                            )
+                          }
+                          disabled={
+                            joiningId ===
+                              neighbourhood.id ||
+                            neighbourhood.joined
+                          }
+                        >
+                          {joiningId ===
+                          neighbourhood.id
+                            ? "Joining..."
+                            : neighbourhood.joined
+                            ? "✓ Already Joined"
+                            : "Join Neighbourhood"}
+                        </button>
+
+                        {messages[
+                          neighbourhood.id
+                        ] && (
+                          <div className="community-card-message">
+                            {
+                              messages[
+                                neighbourhood.id
+                              ]
+                            }
+                          </div>
+                        )}
+
+                      </div>
+
+                    </article>
+                  )
+                )}
+
+              </div>
+            )}
+
+        </section>
+
+      </main>
+
+      <Footer />
+    </>
   );
 }
 
 export default Community;
-

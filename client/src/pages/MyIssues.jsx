@@ -16,6 +16,16 @@ function formatStatus(status) {
     .join(" ");
 }
 
+function formatDate(date) {
+  if (!date) return "";
+
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 function MyIssues() {
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +53,7 @@ function MyIssues() {
           );
         }
 
-        setIssues(data.issues);
+        setIssues(data.issues || []);
       } catch (error) {
         console.error("Error fetching my issues:", error);
 
@@ -62,8 +72,14 @@ function MyIssues() {
     <div>
       <Navbar />
 
-      <main className="issues-page">
-        <section className="issues-header">
+      <main className="issues-page my-issues-page">
+
+        {/* =============================================
+            Header
+        ============================================== */}
+
+        <section className="issues-header my-issues-header">
+
           <div>
             <span className="section-badge">
               My Issues
@@ -72,8 +88,8 @@ function MyIssues() {
             <h1>Issues reported by you</h1>
 
             <p>
-              Track the civic issues you have reported and
-              follow their progress.
+              Track your civic reports, follow their progress
+              and see how authorities respond.
             </p>
           </div>
 
@@ -83,27 +99,40 @@ function MyIssues() {
           >
             + Report an Issue
           </Link>
+
         </section>
 
-        <section className="issues-results">
-          <div className="results-header">
-            <h2>
-              {loading
-                ? "Loading..."
-                : `${issues.length} ${
-                    issues.length === 1
-                      ? "Issue"
-                      : "Issues"
-                  }`}
-            </h2>
+        {/* =============================================
+            Results
+        ============================================== */}
 
-            <span>
-              Your reported issues
-            </span>
+        <section className="issues-results">
+
+          <div className="results-header">
+
+            <div>
+              <h2>
+                {loading
+                  ? "Loading..."
+                  : `${issues.length} ${
+                      issues.length === 1
+                        ? "Issue"
+                        : "Issues"
+                    }`}
+              </h2>
+
+              <span>
+                Your reported civic issues
+              </span>
+            </div>
+
           </div>
+
+          {/* Loading */}
 
           {loading ? (
             <div className="no-issues">
+
               <div className="no-issues-icon">
                 ⏳
               </div>
@@ -113,9 +142,14 @@ function MyIssues() {
               <p>
                 We're getting your reported issues.
               </p>
+
             </div>
           ) : error ? (
+
+            /* Error */
+
             <div className="no-issues">
+
               <div className="no-issues-icon">
                 ⚠️
               </div>
@@ -123,9 +157,14 @@ function MyIssues() {
               <h3>Unable to load your issues</h3>
 
               <p>{error}</p>
+
             </div>
           ) : issues.length === 0 ? (
+
+            /* Empty */
+
             <div className="no-issues">
+
               <div className="no-issues-icon">
                 📋
               </div>
@@ -134,6 +173,7 @@ function MyIssues() {
 
               <p>
                 You haven't reported any civic issues yet.
+                Report a problem in your area to get started.
               </p>
 
               <Link
@@ -142,41 +182,138 @@ function MyIssues() {
               >
                 Report Your First Issue
               </Link>
+
             </div>
           ) : (
-            <div className="issues-grid">
+
+            /* =============================================
+                Issue Cards
+            ============================================== */
+
+            <div className="my-issues-grid">
+
               {issues.map((issue) => (
-                <Link
+                <article
                   key={issue.id}
-                  to={`/issues/${issue.id}`}
                   className="my-issue-card"
                 >
+
+                  {/* Image */}
+
+                  {issue.image_url ? (
+                    <Link
+                      to={`/issues/${issue.id}`}
+                      className="my-issue-image"
+                    >
+                      <img
+                        src={issue.image_url}
+                        alt={`Evidence for ${issue.title}`}
+                      />
+                    </Link>
+                  ) : (
+                    <Link
+                      to={`/issues/${issue.id}`}
+                      className="my-issue-image my-issue-no-image"
+                    >
+                      <span>📷</span>
+
+                      <small>
+                        No photo
+                      </small>
+                    </Link>
+                  )}
+
+                  {/* Content */}
+
                   <div className="my-issue-card-content">
-                    <span className="issue-category">
-                      {issue.category}
-                    </span>
 
-                    <h3>{issue.title}</h3>
+                    {/* Category + Status */}
 
-                    <p>{issue.description}</p>
+                    <div className="my-issue-card-top">
 
-                    <div className="my-issue-meta">
+                      <span className="issue-category">
+                        {issue.category || "Other"}
+                      </span>
+
+                      <span
+                        className={`issue-status ${
+                          issue.status
+                            ? issue.status
+                                .toLowerCase()
+                                .replace(/\s+/g, "-")
+                            : "reported"
+                        }`}
+                      >
+                        {formatStatus(issue.status)}
+                      </span>
+
+                    </div>
+
+                    {/* Title */}
+
+                    <Link
+                      to={`/issues/${issue.id}`}
+                      className="my-issue-title"
+                    >
+                      <h3>{issue.title}</h3>
+                    </Link>
+
+                    {/* Description */}
+
+                    <p className="my-issue-description">
+                      {issue.description ||
+                        "No description provided."}
+                    </p>
+
+                    {/* Location */}
+
+                    <div className="my-issue-location">
+                      <span>📍</span>
+
                       <span>
-                        📍{" "}
                         {issue.address ||
                           "Location not provided"}
                       </span>
-
-                      <span>
-                        {formatStatus(issue.status)}
-                      </span>
                     </div>
+
+                    {/* Footer */}
+
+                    <div className="my-issue-card-footer">
+
+                      <div className="my-issue-date">
+                        {issue.created_at && (
+                          <>
+                            <span>📅</span>
+
+                            <span>
+                              Reported{" "}
+                              {formatDate(
+                                issue.created_at
+                              )}
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+                      <Link
+                        to={`/issues/${issue.id}`}
+                        className="my-issue-view-link"
+                      >
+                        View Details →
+                      </Link>
+
+                    </div>
+
                   </div>
-                </Link>
+
+                </article>
               ))}
+
             </div>
           )}
+
         </section>
+
       </main>
 
       <Footer />
