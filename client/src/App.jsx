@@ -10,6 +10,7 @@ import IssueDetails from "./pages/IssueDetails";
 import AuthorityDashboard from "./pages/AuthorityDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import MyIssues from "./pages/MyIssues";
+import About from "./pages/About";
 
 import "./App.css";
 
@@ -51,6 +52,11 @@ function App() {
         <Route
           path="/"
           element={<Home />}
+        />
+
+        <Route
+          path="/about"
+          element={<About />}
         />
 
         <Route
